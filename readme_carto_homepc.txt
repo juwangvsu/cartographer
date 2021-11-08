@@ -1,3 +1,17 @@
+----------11/7/2021 hdl_400.bag, realsense data repo test -----
+robot_localization pkg first test with realsense 
+	result is bad
+	use imu data only
+	
+cartographer on hdl_400.bag
+	3D lidar scan
+	imu data	
+
+cartographer on turtlebot3_gazebo.bag
+	~/Documents/cartographer$ rosbag play turtlebot3_3_gazebo.bag
+	/media/student/data6/cartographer$ roslaunch turtlebot3_slam/launch/turtlebot3_slam.launch slam_methods:=cartographer
+	work, see video cartographer_turtlebot.mp4
+ 
 ----------11/4/2021 realsense data repo test -----
 hptitan: ~/Documents/cartographer/realsense-data
 
@@ -81,13 +95,36 @@ two machine testing to avoid wired networking problem:
 	asus1, nano1 must be actual ip pingable at both machine.	
 
 ------9/4/21 homepc  cartographer turtlebot3 gazebo----------------------
-roslaunch turtlebot3_gazebo ...
+roslaunch turtlebot3_gazebo turtlebot3_house.launch
 roslaunch turtlebot3_slam turtlebot_slam.launch slam_methods:=cartographer
+	call turtlebot_bringup turtlebot_remote.launch
+		load urdf, robot_state_publisher, tf
+	call turtlebot3_cartographer.launch
+		 move_base.launcha
+	 	 cartographer_node
+		 cartographer_occupancy_grid_node
+		 flat_world_imu_node
+			/imu -> /flat_imu
 	default cartographer launch file setup for real robot
 	crash if using gazebo due to a gazebo imu bug.
 	edit turtlebot_slam.launch 
 		<arg name="configuration_basename" default="turtlebot3_lds_2d_gazebo.lua"/>
 
+cartographer_node sub:
+	 * /flat_imu [sensor_msgs/Imu]
+	 * /odom [nav_msgs/Odometry]
+	 * /scan
+	pub:
+	  /scan_matched_points2
+	 * /submap_list [cartographer_ros_msgs/SubmapList]
+	 /trajectory_node_list
+	config file:
+		turtlebot3_slam/config/turtlebot3_lds_2d.lua
+		laser num, map_frame, odom_frame, use_odom,...
+
+flat_world_imu_node: this node from turtlebot3i_slam pkg
+	sub: /imu
+	pub: /flat_imu
 
 frontier_explore build from src catkin_ws/src
 	explore_client no longer exist, which is used by turtlebot3_frontier_exploration.launch.
@@ -114,6 +151,9 @@ test:
 
 roslaunch cartographer_ros demo_backpack_2d.launch bag_filename:=${HOME}/Documents/cartographer/cartographer_paper_deutsches_museum.bag
 roslaunch cartographer_ros demo_backpack_3d.launch bag_filename:=${HOME}/Documents/cartographer/b3-2016-04-05-14-14-00.bag
+
+hdl_400.bag
+	3d lidar,bag file from hdl_graph_slam/
 
 get map:
 
