@@ -1,3 +1,4 @@
 <launch>
-	<node pkg="tf" type="static_transform_publisher" name="ned_to_enu_pub" args="0 0 0 1.57 0 3.14 base_link 1 100"/>
+	<node pkg="tf" type="static_transform_publisher" name="ned_to_enu_pub" args="0 0 0 1.57 0 3.14 base_link imu_link 100"/>
+	<node pkg="tf" type="static_transform_publisher" name="ned_to_enu_pub2" args="0 0 0 1.57 0 3.14 base_footprint imu_link 100"/>
 </launch>

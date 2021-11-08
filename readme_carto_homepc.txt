@@ -1,5 +1,9 @@
 ----------11/7/2021 hdl_400.bag, realsense data repo test -----
 robot_localization pkg first test with realsense 
+	/robot_localization/launch$ roslaunch ekf_turtlebot.launch
+	rosbag play turtlebot3_3_gazebo.bag
+	cartographer/robot_localization$ roslaunch launch/static_transforms.launch
+	make sure /use_sim_time is not set or false
 	result is bad
 	use imu data only
 	
