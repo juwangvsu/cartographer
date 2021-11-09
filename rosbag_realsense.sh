@@ -1,0 +1,2 @@
+roslaunch realsense2_camera rs_camera.launch enable_gyro:=true enable_accel:=true unite_imu_method:=linear_interpolation enable_pointcloud:=true pointcloud_texture_stream:=RS2_STREAM_ANY&
+rosbag record /camera/depth/camera_info /camera/depth/image_rect_raw /camera/extrinsics/depth_to_color /camera/l500_depth_sensor/parameter_descriptions /camera/l500_depth_sensor/parameter_updates /camera/motion_module/parameter_descriptions /camera/color/camera_info /camera/color/image_raw /camera/depth/color/points /camera/imu

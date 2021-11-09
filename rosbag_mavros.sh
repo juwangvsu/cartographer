@@ -1,0 +1,1 @@
+rosbag record /mavros/imu/data /mavros/imu/data_raw /mavros/imu/diff_pressure /mavros/imu/mag /mavros/imu/static_pressure /mavros/imu/temperature_baro /mavros/local_position/odom /mavros/local_position/pose /mavros/local_position/velocity_body /mavros/local_position/velocity_local 
