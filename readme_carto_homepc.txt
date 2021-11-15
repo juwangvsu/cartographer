@@ -1,11 +1,30 @@
-----------11/7/2021 hdl_400.bag, realsense data repo test -----
+----------11/8/2021 p3at gearup to collect bag data file -----
+	hardware: px4#1 (rover), px4#2 (imu src), pi4b, realsense sensor
+	px4#1 is customized to drive wheel. not able to set airframe, so no data
+	px4#2 is to pump high res imu data to pi, 50 hz, use usb port. telem 
+		port too slow (8 hz)
+	pi4: Documents/cartographer/mavros/launch/, roslaunch iris_px4_ttyACM0.launch 
+	pi4: set /etc/hosts pi4 ip address based on current ip or just localhost
+
+----------11/11/2021 robot_localization, p3at bag file -----
+	edit params/ekf_p3at.yaml
+	/robot_localization/launch$ roslaunch launch/ekf_p3at.launch
+	rosbag play mavros_realsense_long.bag 
+	cartographer/robot_localization$ roslaunch launch/static_transforms_p3at.launch
+	make sure /use_sim_time is not set or false
+
+
+----------11/7/2021 hdl_400.bag, turtlebot bag, realsense data repo test -----
 robot_localization pkg first test with realsense 
+	edit params/ekf_template.yaml
 	/robot_localization/launch$ roslaunch ekf_turtlebot.launch
 	rosbag play turtlebot3_3_gazebo.bag
 	cartographer/robot_localization$ roslaunch launch/static_transforms.launch
 	make sure /use_sim_time is not set or false
+		if set to true, rosbag play --clock, this will publish /clock based on rosbag file to drive other nodes.
 	result is bad
 	use imu data only
+	see video robot_localization_turtlebot.mp4
 	
 cartographer on hdl_400.bag
 	3D lidar scan
@@ -14,6 +33,8 @@ cartographer on hdl_400.bag
 cartographer on turtlebot3_gazebo.bag
 	~/Documents/cartographer$ rosbag play turtlebot3_3_gazebo.bag
 	/media/student/data6/cartographer$ roslaunch turtlebot3_slam/launch/turtlebot3_slam.launch slam_methods:=cartographer
+	turtlebot3_slam/config/turtlebot3_lds_2d_gazebo.lua
+	use odom result is good. not using odom result map has errors.
 	work, see video cartographer_turtlebot.mp4
  
 ----------11/4/2021 realsense data repo test -----

@@ -12,6 +12,18 @@ Git personal access token: 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
 rosservice call /turtlebot3_slam_gmapping/set_logger_level "logger: 'ros.gmapping'
 level: 'debug'" 
 
+-------11/10/2021 mavros plugin loaded for local_position ----
+Plugin home_position loaded
+Plugin imu loaded
+Plugin local_position loaded
+
+mavros topics related to pose, odom, velocity...
+/mavros/imu/data
+/mavros/local_position/odom --- xy 0, z changing, twist seems live data
+/mavros/local_position/pose---------- almost identity to odom
+/mavros/local_position/velocity_body --- almost identity to odom velecity
+/mavros/local_position/velocity_local --- different then above, maybe transformed?
+
 -----11/9/2021 realsense bag recording nano1 ---
 files:
 	rosbag_realsense.sh

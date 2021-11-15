@@ -1,0 +1,21 @@
+<launch>
+	<!-- 
+	launch files may cause the gpsd-start to repeatedly
+	respawn, if not careful. the following cases are known
+	to cause problematic respawning:
+
+	(1) if the launch file contain a required="true" at anywhere,
+		and if it fail to start 
+	(2) two launch files try to start the same nodes. This is the case
+	if both px4.launch and iris_apm_usb.launch are used 
+
+	if problem happen, isolate launch file one by one until find the
+	faulty one.
+
+	a good set of launch files are saved at ~/gpsd.d2
+
+	gpsd-start log file /var/log/upstart/gpsd.log
+	
+ 	diagnosis: dmesg, you will see lot of respawning for gpsd	
+ -->
+</launch>
