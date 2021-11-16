@@ -1,3 +1,18 @@
+----------11/12/2021 cartographer bag study -----
+3d:
+	/horizontal_laser_3d
+	/vertical_laser_3d
+
+	pub:
+	/scan_matched_points2
+	/submap_list
+		each trajectory point have one associated submap, 
+		labeled: trajid, submap index id, version #: 0,0,320
+
+to obtain a submap:
+rosservice call /submap_query "trajectory_id: 0
+submap_index: 0"  > submap_0.0.txt
+
 ----------11/8/2021 p3at gearup to collect bag data file -----
 	hardware: px4#1 (rover), px4#2 (imu src), pi4b, realsense sensor
 	px4#1 is customized to drive wheel. not able to set airframe, so no data
