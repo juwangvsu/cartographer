@@ -47,6 +47,14 @@ options = {
       filename = "xray_xz_all",
       transform = XZ_TRANSFORM,
     },
+    -- We also write a PLY file at this stage, because gray points look good.
+    -- The points in the PLY can be visualized using
+    -- https://github.com/googlecartographer/point_cloud_viewer.
+    {
+      action = "write_ply",
+      filename = "points.ply",
+    },
+
 
     -- Now we recolor our points by frame and write another batch of X-Rays. It
     -- is visible in them what was seen by the horizontal and the vertical

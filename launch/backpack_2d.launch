@@ -27,7 +27,7 @@
   <node name="cartographer_node" pkg="cartographer_ros"
       type="cartographer_node" args="
           -configuration_directory /home/student/Documents/cartographer/configuration_files
-          -configuration_basename turtlebot3_lds_2d.lua"
+          -configuration_basename backpack_2d.lua"
       output="screen">
     <remap from="echoes" to="horizontal_laser_2d" />
   </node>

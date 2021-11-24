@@ -1,3 +1,64 @@
+
+----------11/23/2021 p3at cartograph realsense bag  -----
+cartographer on turtlebot3_gazebo.bag
+	-roslaunch depth_image_proc/depth_image.launch
+	-/media/student/data6/cartographer$ roslaunch launch/p3at_3d.launch
+		configuration_files/p3at_3d.lua
+	-rosbag play mavros_realsense_short.bag --clock
+
+	note: /use_sim_time = true at launch file, rosbag must --clock to drive robot_state_publisher
+	
+	status:
+		carto node seems taking input topic data, but is not working.
+		robot model and tf ok, but map->base_link not working due to cartographer_node
+		not working yet
+		point cloud from depth_image_proc work, but matched pt2 (pub from carto node)
+		nothing yet.
+
+----------11/13/2021 realsense bag study -----
+the realsense bag files (recorded by ros or realsense-viewer) only have depth image, not point cloud.
+rs-convert convert the depth img to point cloud
+rs-convert -d -l plyfile -i realsense_viewer_val.bag
+	the tool however dont work with mavros_realsense_short.bag
+	which is recorded using ros
+meshlab plyfile_169793.55499999999302.ply
+
+depth image can be converted to point cloud using:
+	- depth_image_proc
+	- roslaunch depth_image_proc/depth_image.launch
+		the nodelet use depth/image_rect_raw, depth/camera_info topic, but did rostopic info
+		will not show the topic being subscribed, per nodelet property
+	- rosbag play mavros_realsense_short.bag
+		pub: points
+	- rviz, frameid, camera_depth_optical_frame
+
+video:
+	realsense_depth_image_points.mp4
+
+-----------11/13/2021 two depth images from realsense bag files----
+depth_realsense_viewer_val.txt
+	rostopic echo -n 1 /device_0/sensor_0/Depth_0/image/data > depth_realsense_viewer_val.txt
+depth_realsense_ros_val.txt
+	rostopic echo -n 1 /camera/depth/image_rect_raw > depth_realsense_ros_val.txt
+
+TBD:
+need to verify that the depth image in both type of bag file are of the same
+format. and find/impl a ros node to do real time conversion, sub to depth img
+and pub pt2 topic
+
+validation bag file: both recorded at home, at a similar position
+	realsense_ros_val.bag
+	realsense_viewer_val.bag
+
+--------11/13/2021 realsense rosbag record------------
+roslaunch realsense2_camera rs_camera.launch enable_gyro:=true enable_accel:=true unite_imu_method:=linear_interpolation
+        enable_color:=false enable_depth:=false cut cpu core to 60%
+        enable_pointcloud:=true pointcloud_texture_stream:=RS2_STREAM_ANY
+        pose not supported for l515
+rosbag record /camera/motion_module/parameter_descriptions /camera/l500_depth_sensor/parameter_descriptions /camera/imu /camera/gyro/imu_info /camera/extrinsics/depth_to_color /camera/depth/image_rect_raw /camera/depth/camera_info /camera/color/image_raw/compressed /camera/color/image_raw/compressed/parameter_descriptions /camera/color/image_raw /camera/color/camera_info /camera/accel/imu_info
+
+see readme_nvidia_nano.txt 9/8/21 note
+
 ----------11/12/2021 cartographer bag study -----
 3d:
 	/horizontal_laser_3d
