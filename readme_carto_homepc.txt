@@ -1,4 +1,15 @@
 
+----------11/23/2021 turtlebot cartograph rosbag  -----
+
+simplified launch file for cartographer 2d + turlebot3 bagfile
+	- /media/student/data6/cartographer$ roslaunch launch/turtlebot3_2d.launch
+	- rosbag play turtlebot3_3_gazebo.bag --topics /imu /odom /scan --clock
+
+status:
+	seems work, except the map is crooked. use_sim_time=true in launch file
+
+see 11/7 turtlebot carto notes
+
 ----------11/23/2021 p3at cartograph realsense bag  -----
 cartographer on turtlebot3_gazebo.bag
 	-roslaunch depth_image_proc/depth_image.launch
@@ -6,7 +17,7 @@ cartographer on turtlebot3_gazebo.bag
 		configuration_files/p3at_3d.lua
 	-rosbag play mavros_realsense_short.bag --clock
 
-	note: /use_sim_time = true at launch file, rosbag must --clock to drive robot_state_publisher
+	note: /use_sim_time = true at launch file, rosbag must --clock to drive robot_state_publisher, if not set or false, robot_state_publisher will use system clock, it should still work
 	
 	status:
 		carto node seems taking input topic data, but is not working.
@@ -107,12 +118,26 @@ cartographer on hdl_400.bag
 	imu data	
 
 cartographer on turtlebot3_gazebo.bag
-	~/Documents/cartographer$ rosbag play turtlebot3_3_gazebo.bag
+	roscore;rosparam set /use_sim_time true
+	~/Documents/cartographer$rosbag play turtlebot3_3_gazebo.bag --topics /imu /odom /scan --clock
 	/media/student/data6/cartographer$ roslaunch turtlebot3_slam/launch/turtlebot3_slam.launch slam_methods:=cartographer
 	turtlebot3_slam/config/turtlebot3_lds_2d_gazebo.lua
+	
 	use odom result is good. not using odom result map has errors.
 	work, see video cartographer_turtlebot.mp4
- 
+	
+	note 11/23: if play all topics, the recorded tf allow robot model to show. if only play sensor data topics, carto node publish odom->base_footprint depending dep on /clock and sensor data timestamp. rosbag --clock publish /clock using time info in the bag file even if the bag file does not contain /clock data. it will use /imu time stamp for example.
+		(1) /use_sim_time=true & --clock: all is good. 
+		(2) /use_sim_time=true & no clock, no nothing. 
+		(3) /use_sim_time=false & no clock, no robot visual, scan and map good, odom->base_footprint tf exist but xyz translation totally wrong.
+		(4) /use_sim_time=false & --clock, no robot visual, scan and map good. odom->base_footprint tf exist but xyz translation totally wrong. 
+		(5) see video cartographer_turtlebot_2.mp4
+
+	tf files for the four cases:
+		turtlebot3_slam/frames_turtlecarto_1/2/3/4.pdf
+
+	when odom-> base_footprint tf is pulished by carto node, such as in case (1), this tf is the chaning robot pose. the robot visual is moving in rviz. if we force a static odom->base_footprint tf, the robot visual remain static in rviz
+
 ----------11/4/2021 realsense data repo test -----
 hptitan: ~/Documents/cartographer/realsense-data
 
