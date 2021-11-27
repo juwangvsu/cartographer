@@ -10,7 +10,7 @@ to turn on rviz," open_rviz:=true" at cmd line
         args="load depth_image_proc/point_cloud_xyz nodelet_manager">
     <remap from="camera_info" to="/camera/depth/camera_info"/>
     <remap from="image_rect" to="/camera/depth/image_rect_raw"/>
-    <remap from="points" to="/camera/depth/points"/> 
+    <remap from="points" to="/camera/depth/points2"/> 
   </node>
   <group if="$(arg open_rviz)">
   <node name="rviz" pkg="rviz" type="rviz" required="true"

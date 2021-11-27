@@ -1,13 +1,100 @@
 
-----------11/23/2021 turtlebot cartograph rosbag  -----
+----------11/26/2021 mavros short bag debugging -----
+     then tinker the mavros_realsense_short.bag,
+	transcode mavros_realsense_short.bag to have the same topics and
+	frame_id as b3_transrecord.bag. mavros bag file contain /mavros/imu/data 	but frame_id is base_link; it also have depthimage: also imu z gravity
+	must be negative.
+	
+	- roscore; rosparam set /use_sim_time true
+	 -rosbag record -O mavrosshort_transrecord.bag /mavros/imu/data /camera/depth/points2	
+        -roslaunch depth_image_proc/depth_image.launch
+	 - python baglistener_mavrosshort.py
+        -rosbag play mavros_realsense_short.bag /mavros/imu/data:=/tmpimu --clock
+	test:
+	-	camera_depth frame rotated so the pt looks normal
+		p3at_3d_90deg.urdf
+	- roslaunch launch/p3at_3d_90deg.launch
+	- rosbag play mavrosshort_transrecord.bag --clock
+	status:
+		carto node seems received the imu and pt2 data
+		but fail to calculate, another issue with clock
+		within data? 
+
+		or check if the range data related setting.
+		or lua param about # of accumulated pt2 too high
+			the b3_xxx bag pt2 msg only contain a small
+			section, so lua param num_accumulated_range_data =160
+			change to 1.
+			this seems work. the carto node is calculating and
+			publish map->odom tf, but still crash.
+			
+
+----------11/24-25/2021 demo cartograph 3d rosbag simplify -----
+simpflied backpack_3d demo work:
+	- b3_rerecord.bag is record from the b3_xxx bag file
+	- only horizental laser and imu are recorded
+	- launch file and lua file edited accordingly
+	- work file:
+
+steps:
+	- roscore; rosparam set /use_sim_time true
+	- rosbag record  -O b3_rerecord.bag /imu /horizontal_laser_3d
+	- roslaunch launch/demo_backpack_3d_nobag.launch
+	- rosbag play b3_rerecord.bag --clock
+
+idea: convert b3_rerecord.bag to change frame_id field to test it with
+	p3at_3d.launch
+     then tinker the mavros_realsense_short.bag
+
+status:
+   failed try:
+	bag.py to convert bagfile 80%, end_time not working
+	carto node not working, warn msg seems indicate time stamp mismatch
+	compare two lua files: p3at and backpack_3d
+	problem: when write to bag file, the last chunk end_time is the current
+	system time, which is probably a end-of-chunk msg appended at close()
+	
+	11/25 update: bag.py generated test.bag buggy. multiple places of inconsisitant time stamps.
+
+   current try:
+	try to transcode topics in a different way use a listener/publisher:
+	new bag file step:	
+	- roscore; rosparam set /use_sim_time true
+	 -rosbag record -O b3_transrecord.bag /mavros/imu/data /camera/depth/points2	
+	 - python baglistener.py
+	 - rosbag play b3_rerecord.bag --clock
+
+	new bag file test seems working:	
+	- roslaunch launch/p3at_3d.launch
+	- rosbag play b3_transrecord.bag --clock
+	- carto node working and rviz showing stuff. the map is not correct.
+		- resolved: b3_transrecord.bag's /mavros/imu/data's frame_id
+		incorrectly set to base_link, fixed baglistener.py so the imu
+		frame_id=imu_link
+
+TBD: 
+     then tinker the mavros_realsense_short.bag,
+
+----------11/23/2021 turtlebot  cartograph 2d rosbag  -----
 
 simplified launch file for cartographer 2d + turlebot3 bagfile
 	- /media/student/data6/cartographer$ roslaunch launch/turtlebot3_2d.launch
 	- rosbag play turtlebot3_3_gazebo.bag --topics /imu /odom /scan --clock
 
 status:
-	seems work, except the map is crooked. use_sim_time=true in launch file
+	seems work, the map is crooked. this is due to lidar_link joint
+	in turtlebot3_simple.urdf's rpy not zero. fixed
+	use_sim_time=true in launch file
 
+rosbag re-record from bagfile:
+	to preserve same time as old bag file, use_sim_time=true
+	-roscore; rosparam set /use_sim_time true
+	-rosbag record  -O turtlebot3_rerecord.bag /imu /odom /scan	
+	-rosbag play turtlebot3_3_gazebo.bag --topics /imu /odom /scan --clock
+	-verify timestamp and topics: rosbag info new.bag
+	-verify turtlebot3_rerecord.bag with carto launch above
+
+see video: cartographer_turtlebot_3.mp4
 see 11/7 turtlebot carto notes
 
 ----------11/23/2021 p3at cartograph realsense bag  -----

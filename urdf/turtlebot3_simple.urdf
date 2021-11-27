@@ -68,7 +68,7 @@
   <joint name="imu_link_joint" type="fixed">
     <parent link="base_link" />
     <child link="imu_link" />
-    <origin xyz="0 0 0" rpy="3.1416 0 0" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
   </joint>
 
   <joint name="camera_depth_optical_frame_joint" type="fixed">
@@ -80,6 +80,6 @@
   <joint name="lidar_link" type="fixed">
     <parent link="base_link" />
     <child link="base_scan" />
-    <origin xyz="0.19 0. 0.04" rpy="0. 1.3963 0." />
+    <origin xyz="0.19 0. 0.04" rpy="0. 0. 0." />
   </joint>
 </robot>

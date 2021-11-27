@@ -1,0 +1,22 @@
+<!--
+	only use horizental lidar
+-->
+
+<launch>
+  <param name="robot_description"
+    textfile="$(find cartographer_ros)/urdf/backpack_3d.urdf" />
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher"
+    type="robot_state_publisher" />
+
+  <node name="cartographer_node" pkg="cartographer_ros"
+      type="cartographer_node" args="
+          -configuration_directory $(env HOME)/Documents/cartographer/configuration_files
+          -configuration_basename backpack_3d_horizental.lua"
+      output="screen">
+    <remap from="points2" to="horizontal_laser_3d" />
+  </node>
+
+  <node name="cartographer_occupancy_grid_node" pkg="cartographer_ros"
+      type="cartographer_occupancy_grid_node" args="-resolution 0.05" />
+</launch>
