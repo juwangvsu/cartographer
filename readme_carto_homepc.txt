@@ -1,4 +1,13 @@
 
+----------11/26/2021 b3 bag imu taint experiment  -----
+setting TRAJECTORY_BUILDER_2D = {
+  use_imu_data = false,
+seems not affecting the carto result
+
+taint imu effect limited, neg y,z of the imu data seem flip the resultant
+trajectory by rotate x-axis 180 deg
+adding offset to z or neg z only no effect.
+
 ----------11/26/2021 mavros short bag debugging -----
      then tinker the mavros_realsense_short.bag,
 	transcode mavros_realsense_short.bag to have the same topics and
@@ -65,12 +74,15 @@ status:
 	 - rosbag play b3_rerecord.bag --clock
 
 	new bag file test seems working:	
-	- roslaunch launch/p3at_3d.launch
+	- roslaunch launch/p3at_3d_b3bag.launch
 	- rosbag play b3_transrecord.bag --clock
 	- carto node working and rviz showing stuff. the map is not correct.
 		- resolved: b3_transrecord.bag's /mavros/imu/data's frame_id
 		incorrectly set to base_link, fixed baglistener.py so the imu
 		frame_id=imu_link
+		p3at_3d_b3bag.launch use p3at_3d_b3bag.lua
+		p3at_3d.launch use p3at_3d.lua
+			num_accumulated_range_data = 1 or 160 dep on bag files
 
 TBD: 
      then tinker the mavros_realsense_short.bag,
@@ -341,6 +353,27 @@ flat_world_imu_node: this node from turtlebot3i_slam pkg
 
 frontier_explore build from src catkin_ws/src
 	explore_client no longer exist, which is used by turtlebot3_frontier_exploration.launch.
+
+------11/27/21 homepc build  cartographer_ros from src----------------------
+/media/student/data6/catkin_ws
+using ninja tool
+	catkin_make_isolated --install --use-ninja
+	this will download both cartographer and cartographer_ros
+	and build cartographer_ros
+
+# To Build  Cartographer seperately (to access test)
+cd /media/student/data6/catkin_ws/src/cartographer
+mkdir build
+cd build
+cmake .. -G Ninja
+ninja
+	all the tests will be compiled under build/
+	./cartographer.transform.transform_test
+
+CTEST_OUTPUT_ON_FAILURE=1 ninja test
+	this run all tests
+
+#sudo ninja install
 
 ------9/2/21 homepc install cartographer ----------------------
 

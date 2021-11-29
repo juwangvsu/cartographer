@@ -1,0 +1,18 @@
+<!--
+	topics:
+		/imu			frame_id: imu_link
+		/horizontal_laser_3d	frame_id: horizontal_vlp16_link
+-->
+
+<launch>
+  <param name="/use_sim_time" value="false" />
+
+  <param name="robot_description"
+    textfile="$(env HOME)/Documents/cartographer/urdf/backpack_3d.urdf" />
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher"
+    type="robot_state_publisher" />
+
+  <node name="rviz" pkg="rviz" type="rviz" required="true"
+      args="-d $(env HOME)/Documents/cartographer/configuration_files/imu_test.rviz" />
+</launch>
