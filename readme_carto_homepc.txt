@@ -319,6 +319,17 @@ two machine testing to avoid wired networking problem:
 		ROS_HOSTNAME=nano1
 	asus1, nano1 must be actual ip pingable at both machine.	
 
+------11/29/21 homepc cartographer turtlebot3 gazebo rosbag record----------------------
+roslaunch turtlebot3_slam/launch/turtlebot3_house_bringup.launch 
+	topics: 
+		/odom, /imu, /camera/depth/points, /camera/depth/image_raw, /camera/rgb/image_raw, 
+		/camera/depth/camera_info, /camera/rgb/camera_info, /scan
+	frame_id: odom,base_footprint, camera_depth_optical_frame,camera_depth_optical_frame, camera_depth_optical_frame, 
+
+
+
+fixed urdf launch so imu publish with gravity. 
+
 ------9/4/21 homepc  cartographer turtlebot3 gazebo----------------------
 roslaunch turtlebot3_gazebo turtlebot3_house.launch
 roslaunch turtlebot3_slam turtlebot_slam.launch slam_methods:=cartographer
