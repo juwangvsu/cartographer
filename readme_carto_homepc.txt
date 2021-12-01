@@ -1,3 +1,77 @@
+----11/30/21 verify carto result with 'ground truth'------------------
+data:
+	turtlebot3_imuodompt2.bag
+
+traj_turtlebot_imuodompt2.txt
+	traj2csv.py
+	traj_turtlebot3d_carto.csv
+	traj calculated by carto, points no time stamp
+		point in local map frame, so start at (0,0,0)
+	rostopic echo /trajectory_node_list -n 1 
+	from time 233 to 248
+ground truth:
+	odom2csv.py
+	odom_turtlebot3d_carto.csv
+	/odom topic in the bag file, published by gazebo, in global frame
+	starting point is not (0,0,0)
+
+Obs:
+	carto traj floating even robot is static (at begining)
+	carto traj seems scaled down, x 3 meters vs 4 meters gt.
+
+TBD: test pure imu integral result.
+
+------11/29/21 homepc cartographer turtlebot3 gazebo rosbag record----------------------
+turtlebot3_slam/launch/turtlebot3_house_bringup.launch 
+	topics: 
+		/odom, /imu, /camera/depth/points, /camera/depth/image_raw, /camera/rgb/image_raw, 
+		/camera/depth/camera_info, /camera/rgb/camera_info, /scan
+	frame_id: odom,base_footprint, camera_depth_optical_frame,camera_depth_optical_frame, camera_depth_optical_frame, 
+
+fixed urdf launch so imu publish with gravity. 
+	- worked. issues solved:
+	   -- no fixed joint in gazebo, workaround with revolute joint
+	   -- camera_link inertial fixed. inertial required when change
+		camera_joint to revolute, otherwise the link not work in 
+		gazebo, and the camera plugin not work. if camera_link is
+		fixed, the joint will not be recogized by gazebo, but the
+		camera_link would work without inertial and camera plugin
+		work, as in the stock turtlebot3_description setup.
+	   -- bad joint/link/inertial also make robot not moving plugin 
+		fail
+	   -- compare turtlebot3_description/urdf/turtlebot3_waffle.urdf
+		for detail
+	   -- negative gravity vector:
+		imu sensor pose <pose>0 0 0 3.14159 0 0</pose>, so the observed
+		imu have gravity acc pointing down (negative). this set is
+		in turtlebot3_description/urdf/turtlebot3_waffle.gazebo.xacro
+record bag:
+	roslaunch turtlebot3_slam/launch/turtlebot3_house_bringup.launch 
+	rosbag record -O turtlebot3_imuodompt2.bag /scan /odom /imu /camera/rgb/camera_info /camera/rgb/image_raw/compressed /camera/depth/camera_info /camera/depth/image_raw /camera/depth/points
+
+play recorded bag:
+	roslaunch turtlebot3_slam/launch/turtlebot3_bringup_tf.launch
+	rosbag play turtlebot3_imuodompt2.bag --clock
+
+test with carto:
+	roslaunch launch/launch/turtlebot3_3d.launch
+	rosbag play turtlebot3_imuodompt2.bag --topics /imu /camera/depth/points /camera/depth/points:=/camera/depth/points2 /imu:=/mavros/imu/data --clock
+	carto node work, result no good. pt2 seems at z-axis, rotate needed? 
+	fixed:	create corresponding urdf for simplified turtlebot
+		turtlebot3_3d.urdf camera_depth_optical_frame_joint
+			  rpy="1.571 0. -1.571"
+	pt2 dispaly slugish, point cloud too dense?
+		play-pause bag file make cpu easy.
+	carto trajectory good up to 16 sec. at 17 sec the pt2 change too much
+		cause scan matching fail and result in bad traj.
+
+videos:
+	turtlebot3_gazebo_imupt2.mp4 -------- turtlebot3_house_bringup.launch
+	turtlebot3_gazebo_imupt2_recordbag.mp4 -------- record turtlebot3_imuodompt2.bag
+	turtlebot3_gazebo_imupt2_carto.mp4 -------- first carto test with turtlebot3_imuodompt2.bag 
+ 
+
+see 9/4/2021 note
 
 ----------11/26/2021 b3 bag imu taint experiment  -----
 setting TRAJECTORY_BUILDER_2D = {
@@ -318,17 +392,6 @@ two machine testing to avoid wired networking problem:
 		ROS_MASTER_URI=http://asus1:11311
 		ROS_HOSTNAME=nano1
 	asus1, nano1 must be actual ip pingable at both machine.	
-
-------11/29/21 homepc cartographer turtlebot3 gazebo rosbag record----------------------
-roslaunch turtlebot3_slam/launch/turtlebot3_house_bringup.launch 
-	topics: 
-		/odom, /imu, /camera/depth/points, /camera/depth/image_raw, /camera/rgb/image_raw, 
-		/camera/depth/camera_info, /camera/rgb/camera_info, /scan
-	frame_id: odom,base_footprint, camera_depth_optical_frame,camera_depth_optical_frame, camera_depth_optical_frame, 
-
-
-
-fixed urdf launch so imu publish with gravity. 
 
 ------9/4/21 homepc  cartographer turtlebot3 gazebo----------------------
 roslaunch turtlebot3_gazebo turtlebot3_house.launch

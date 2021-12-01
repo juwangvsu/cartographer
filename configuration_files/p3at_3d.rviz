@@ -5,10 +5,11 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /RobotModel1
+        - /RobotModel1/Links1
+        - /RobotModel1/Links1/base_link1
         - /Submaps1
-        - /PointCloud23
         - /PointCloud23/Autocompute Value Bounds1
+        - /Odometry1
       Splitter Ratio: 0.6006709933280945
     Tree Height: 391
   - Class: rviz/Selection
@@ -194,8 +195,8 @@ Visualization Manager:
       Submaps:
         All: true
         Trajectory 0:
-          0.296: true
-          1.136: true
+          0.213: true
+          1.53: true
           Value: true
       Topic: /submap_list
       Tracking frame: base_link
@@ -255,6 +256,40 @@ Visualization Manager:
         {}
       Queue Size: 100
       Value: false
+    - Angle Tolerance: 0.10000000149011612
+      Class: rviz/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: false
+      Enabled: true
+      Keep: 100
+      Name: Odometry
+      Position Tolerance: 0.10000000149011612
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.10000000149011612
+        Color: 255; 25; 0
+        Head Length: 0.30000001192092896
+        Head Radius: 0.10000000149011612
+        Shaft Length: 1
+        Shaft Radius: 0.05000000074505806
+        Value: Arrow
+      Topic: /odom
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 100; 100; 100
@@ -282,7 +317,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: 0
+      Angle: -1.184999942779541
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -292,11 +327,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 138.00897216796875
+      Scale: 56.608238220214844
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 0.1159120500087738
-      Y: -0.2658390998840332
+      X: 1.4239585399627686
+      Y: 0.7727099061012268
     Saved: ~
 Window Geometry:
   Displays:
@@ -314,5 +349,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1163
-  X: 588
-  Y: 27
+  X: 363
+  Y: 227

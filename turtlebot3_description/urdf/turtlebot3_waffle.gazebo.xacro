@@ -98,7 +98,7 @@
       <gaussianNoise>0.0</gaussianNoise>
       <updateRateHZ>100.0</updateRateHZ>
     </plugin>
-    <pose>0 0 0 3.14159 0 0</pose>
+    <pose>0 0 0 0 0 0</pose>
     </sensor>
   </gazebo>
 

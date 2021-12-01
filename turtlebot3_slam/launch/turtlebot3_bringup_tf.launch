@@ -4,13 +4,7 @@
   <arg name="slam_methods" default="gmapping" doc="slam type [gmapping, cartographer, cartographer_gazebo, hector, karto, frontier_exploration]"/>
   <arg name="configuration_basename" default="turtlebot3_lds_2d_gazebo.lua"/>
   <arg name="open_rviz" default="true"/>
- <arg name="use_sim_time" value="true"/>
-
-  <!-- TurtleBot3 start gazebo, spawn robot form /robot_description, spawn will be blocked untile urdf is loaded 
-below
--->
-  <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_house.launch">
-  </include>
+ <param name="/use_sim_time" value="true"/>
 
   <!-- TurtleBot3 load up urdf to /robot_description
 -->
@@ -27,12 +21,11 @@ joint_state_publisher, revolute joint will not be in tf tree
     <param name="tf_prefix" value="$(arg multi_robot_name)"/>
   </node>
 <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
-
+<node pkg="tf" type="static_transform_publisher" name="odomtobase" args="0 0 0 0 0 0 odom base_footprint 100"/>
   <!-- rviz -->
   <group if="$(arg open_rviz)">
     <node pkg="rviz" type="rviz" name="rviz" required="true"
           args="-d $(env HOME)/Documents/cartographer/turtlebot3_slam/rviz/turtlebot3_house.rviz"/>
   </group>
 
-    <node pkg="rqt_robot_steering" type="rqt_robot_steering" name="rsteer" required="true" />
 </launch>
