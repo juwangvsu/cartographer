@@ -1,0 +1,5 @@
+<launch>
+  <!-- rviz -->
+    <node pkg="rviz" type="rviz" name="rviz" required="true"
+          args="-d $(env HOME)/Documents/cartographer/turtlebot3_slam/rviz/turtlebot3_house.rviz"/>
+</launch>
