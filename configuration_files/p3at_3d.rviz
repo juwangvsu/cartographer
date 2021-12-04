@@ -5,11 +5,14 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /TF1
+        - /TF1/Frames1
         - /RobotModel1/Links1
         - /RobotModel1/Links1/base_link1
         - /Submaps1
         - /PointCloud23/Autocompute Value Bounds1
         - /Odometry1
+        - /Odometry1/Shape1
       Splitter Ratio: 0.6006709933280945
     Tree Height: 391
   - Class: rviz/Selection
@@ -30,7 +33,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2
+    SyncSource: ""
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -60,33 +63,62 @@ Visualization Manager:
       Enabled: true
       Frame Timeout: 15
       Frames:
-        All Enabled: true
+        All Enabled: false
+        base_footprint:
+          Value: true
         base_link:
           Value: true
+        base_scan:
+          Value: false
+        camera_depth_frame:
+          Value: false
         camera_depth_optical_frame:
-          Value: true
+          Value: false
+        camera_link:
+          Value: false
+        camera_rgb_frame:
+          Value: false
+        camera_rgb_optical_frame:
+          Value: false
+        caster_back_left_link:
+          Value: false
+        caster_back_right_link:
+          Value: false
         imu_link:
-          Value: true
-        map:
-          Value: true
+          Value: false
         odom:
           Value: true
-        vertical_vlp16_link:
-          Value: true
+        wheel_left_link:
+          Value: false
+        wheel_right_link:
+          Value: false
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        map:
-          odom:
+        odom:
+          base_footprint:
             base_link:
-              camera_depth_optical_frame:
+              base_scan:
+                {}
+              camera_link:
+                camera_depth_frame:
+                  camera_depth_optical_frame:
+                    {}
+                camera_rgb_frame:
+                  camera_rgb_optical_frame:
+                    {}
+              caster_back_left_link:
+                {}
+              caster_back_right_link:
                 {}
               imu_link:
                 {}
-              vertical_vlp16_link:
+              wheel_left_link:
+                {}
+              wheel_right_link:
                 {}
       Update Interval: 0
       Value: true
@@ -194,10 +226,6 @@ Visualization Manager:
       Submap query service: /submap_query
       Submaps:
         All: true
-        Trajectory 0:
-          0.213: true
-          1.53: true
-          Value: true
       Topic: /submap_list
       Tracking frame: base_link
       Unreliable: false
@@ -237,7 +265,7 @@ Visualization Manager:
       Marker Topic: /trajectory_node_list
       Name: Trajectories
       Namespaces:
-        Trajectory 0: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -274,7 +302,7 @@ Visualization Manager:
           Value: true
         Value: false
       Enabled: true
-      Keep: 100
+      Keep: 1
       Name: Odometry
       Position Tolerance: 0.10000000149011612
       Shape:
@@ -284,7 +312,7 @@ Visualization Manager:
         Color: 255; 25; 0
         Head Length: 0.30000001192092896
         Head Radius: 0.10000000149011612
-        Shaft Length: 1
+        Shaft Length: 0.20000000298023224
         Shaft Radius: 0.05000000074505806
         Value: Arrow
       Topic: /odom
@@ -294,7 +322,7 @@ Visualization Manager:
   Global Options:
     Background Color: 100; 100; 100
     Default Light: true
-    Fixed Frame: map
+    Fixed Frame: odom
     Frame Rate: 30
   Name: root
   Tools:
@@ -317,7 +345,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -1.184999942779541
+      Angle: -0.7399991154670715
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -327,11 +355,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 56.608238220214844
+      Scale: 289.2325134277344
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 1.4239585399627686
-      Y: 0.7727099061012268
+      X: -5.888442516326904
+      Y: 3.9263038635253906
     Saved: ~
 Window Geometry:
   Displays:
@@ -349,5 +377,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1163
-  X: 363
-  Y: 227
+  X: 485
+  Y: 36

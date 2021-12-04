@@ -1,3 +1,30 @@
+----12/2/21 python code to calculate odom from raw imu data turtlebot bag ---
+assume orientation know from the odom topic.
+	python odomimu2csv.py test3.csv
+		convert imu and odom topic to csv
+	test3.csv: 
+		converted from topics from turtlebot3_3_gazebo.bag
+	odomimutf_example.py
+
+turtlebot3_3_gazebo.bag: when vehicle rotate-move, the x-acc and y-acc is not clear-cut
+	iinitial pose: -90deg z-axis
+	2993 - 3001 idle
+
+	3001.496 -3002.3 x-acc + , x-vel ramp up 
+	3001 - 3011 x-body -3 meters 
+	3010.4 - 3011.3  x-acc -, x-vel dec down
+
+	3011-3017 rotate z-axis +90 deg
+
+	3018.606 - 319.2 x-acc +, x-vel ramp up
+	3019-3034 x-body + 3 meters 
+	3033.021 - 3034.5: x-acc -, x-vel dec down 
+
+	3034-3041 rotate z-axis +100 deg
+
+	3040.456 - 3041.21 x-acc - x-vel ramp up
+	3044.1 - 3045	x-acc +, y-acc strong, x-vel down
+	
 ----11/30/21 verify carto result with 'ground truth'------------------
 data:
 	turtlebot3_imuodompt2.bag

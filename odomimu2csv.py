@@ -38,6 +38,7 @@ def callbackimu(imumsg):
         'an_x':round(imumsg.angular_velocity.x,fdigis),
         'an_y':round(imumsg.angular_velocity.y,fdigis),
         'an_z':round(imumsg.angular_velocity.z,fdigis)})
+#    print('msg time: ', prevmsg_t, 'preodom.x', prevodom.pose.pose.position.x)
 
 def callback(odommsg):
     global odomsub, outfile, prevmsg_t, writer, prevodom
@@ -52,9 +53,10 @@ def callback(odommsg):
         'qy':round(odommsg.pose.pose.orientation.y,fdigis), 
         'qz':round(odommsg.pose.pose.orientation.z,fdigis), 
         'qw':round(odommsg.pose.pose.orientation.w, fdigis)})
+    outfile.flush()
     prevmsg_t = msg_t
     prevodom = odommsg
-    print('msg time: ', prevmsg_t)
+    print('msg time: ', prevmsg_t, 'odom.x', odommsg.pose.pose.position.x)
 
 if __name__ == "__main__":
     global odomsub, prevmsg_t, outfile, writer,imusub, prevodom
