@@ -1,3 +1,9 @@
+----12/5/21 mavrosshort_.bag carto test ---
+mavrosshort_transrecord.bag
+see 11/26/21 note
+
+	imu_link y-axis = base_link x-axis? this is wrong. from rviz viewing the data.
+
 ----12/4/21 turtlebot  turtlebot3_imuodompt2_3.bag carto test ---
 
 changed turtlebot3_waffle.gazebo.xacro
@@ -111,7 +117,7 @@ record bag:
 play recorded bag:
 	roslaunch turtlebot3_slam/launch/turtlebot3_bringup_tf.launch
 	rosbag play turtlebot3_imuodompt2.bag --clock
-	rosbag play turtlebot3_imuodompt2_2.bag --clock
+	rosbag play turtlebot3_imuodompt2_3.bag --clock
 
 test with carto:
 	roslaunch launch/turtlebot3_3d.launch
@@ -147,33 +153,46 @@ trajectory by rotate x-axis 180 deg
 adding offset to z or neg z only no effect.
 
 ----------11/26/2021 mavros short bag debugging -----
-     then tinker the mavros_realsense_short.bag,
-	transcode mavros_realsense_short.bag to have the same topics and
-	frame_id as b3_transrecord.bag. mavros bag file contain /mavros/imu/data 	but frame_id is base_link; it also have depthimage: also imu z gravity
+mavrosshort_transrecord.bag:
+	/camera/depth/points2	sensor_msgs/PointCloud2
+	/mavros/imu/data	sensor_msgs/Imu
+transcode mavros_realsense_short.bag to have the same topics and
+	frame_id as b3_transrecord.bag. mavros bag file contain /mavros/imu/data
+ 	but frame_id is base_link; it also have depthimage: also imu z gravity
 	must be negative.
-	
+	also convert depth/image_rect_raw to depth/points
+
+  bag record:	
 	- roscore; rosparam set /use_sim_time true
 	 -rosbag record -O mavrosshort_transrecord.bag /mavros/imu/data /camera/depth/points2	
         -roslaunch depth_image_proc/depth_image.launch
 	 - python baglistener_mavrosshort.py
         -rosbag play mavros_realsense_short.bag /mavros/imu/data:=/tmpimu --clock
-	test:
+
+  view bag file:
+	roslaunch launch/p3at_bringup_tf.launch 
+	rosbag play mavrosshort_transrecord.bag --topics /mavros/imu/data /camera/depth/points2  /mavros/imu/data:=/imu /camera/depth/points2:=/camera/depth/points --clock 
+
+  test:
 	-	camera_depth frame rotated so the pt looks normal
 		p3at_3d_90deg.urdf
 	- roslaunch launch/p3at_3d_90deg.launch
 	- rosbag play mavrosshort_transrecord.bag --clock
 	status:
-		carto node seems received the imu and pt2 data
+		fixed:	carto node seems received the imu and pt2 data
 		but fail to calculate, another issue with clock
 		within data? 
 
-		or check if the range data related setting.
-		or lua param about # of accumulated pt2 too high
-			the b3_xxx bag pt2 msg only contain a small
+		fixed: the b3_xxx bag pt2 msg only contain a small
 			section, so lua param num_accumulated_range_data =160
 			change to 1.
-			this seems work. the carto node is calculating and
+		the carto node is calculating and
 			publish map->odom tf, but still crash.
+			the map and traj produced are wrong. scan match result bad
+			also seem the imu y-axis is inline with robot x-axis.
+
+Video:
+	mavrosshort_carto.mp4
 			
 
 ----------11/24-25/2021 demo cartograph 3d rosbag simplify -----
@@ -248,6 +267,11 @@ see video: cartographer_turtlebot_3.mp4
 see 11/7 turtlebot carto notes
 
 ----------11/23/2021 p3at cartograph realsense bag  -----
+view mavros bag file:
+	roslaunch turtlebot3_slam/launch/turtlebot3_bringup_tf.launch
+	rosbag play mavros_realsense_short.bag --topics /mavros/imu/data /camera/depth/image_rect_raw /camera/depth/image_rect_raw:=/camera/depth/image_raw /mavros/imu/data:=/imu --clock
+
+
 cartographer on turtlebot3_gazebo.bag
 	-roslaunch depth_image_proc/depth_image.launch
 	-/media/student/data6/cartographer$ roslaunch launch/p3at_3d.launch
