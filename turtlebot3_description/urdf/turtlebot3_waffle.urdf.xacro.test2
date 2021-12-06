@@ -236,12 +236,29 @@
     </inertial>
   </link>
 
-  <joint name="camera_rgb_joint" type="fixed">
+  <joint name="camera_rgb_joint" type="revolute">
     <origin xyz="${r200_cam_rgb_px} ${r200_cam_rgb_py} ${r200_cam_rgb_pz}" rpy="0 0 0"/>
     <parent link="camera_link"/>
     <child link="camera_rgb_frame"/>
+        <axis xyz="0 0 1"/>
+    <limit effort="1000.0" lower="0.0" upper="0.0" velocity="0.5"/>
   </joint>
-  <link name="camera_rgb_frame"/>
+
+  <link name="camera_rgb_frame">
+    <collision>
+      <origin xyz="0.003 0.065 0.007" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.012 0.0132 0.020"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.114" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001" />
+    </inertial>
+  </link>
 
   <joint name="camera_rgb_optical_joint" type="fixed">
     <origin xyz="0 0 0" rpy="-1.57 0 -1.57"/>

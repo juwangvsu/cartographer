@@ -1,4 +1,25 @@
+----12/4/21 turtlebot  turtlebot3_imuodompt2_3.bag carto test ---
+
+changed turtlebot3_waffle.gazebo.xacro
+	<sensor type="depth" name="realsense_R200">
+		<width>320</width>
+              <height>240</height>
+this seems help a bit. still no good:
+	- point still too dense?
+	- floor point causing problem?
+
+see 11/29/21 note prev test run
+
+----12/4/21 turtlebot urdf gazebo small bugs ---
+
+fixed urdf bug: camera_link and camera_rgb_frame in gazebo small movement due to joint limit
+
+bug remained:
+	in gazebo, when stoping robot, it will have a noticable rotation
+	like type skidding. possible causes: cast joints friction...
+
 ----12/2/21 python code to calculate odom from raw imu data turtlebot bag ---
+ 
 assume orientation know from the odom topic.
 	python odomimu2csv.py test3.csv
 		convert imu and odom topic to csv
@@ -24,10 +45,21 @@ turtlebot3_3_gazebo.bag: when vehicle rotate-move, the x-acc and y-acc is not cl
 
 	3040.456 - 3041.21 x-acc - x-vel ramp up
 	3044.1 - 3045	x-acc +, y-acc strong, x-vel down
+More data about imu's ax, yx,..
+	roslaunch turtlebot3_slam/launch/turtlebot3_house_bringup.launch
+	python odomimu2csv.py test.csv
+test4.ods: rotation clockwise
+test5.ods: rotation counter-clockwise
+test6.ods: forward movement, x-acc positive during ramping up, then negative when winding down.
+test7.ods: backward movement, x-acc negative during ramping up, then positive when winding down.
+Y-acc also exist, but much smaller than x-acc
+test8.ods: forward movement, orientation 45 deg z-axis. ax ay similar to test6, as expected. ax_o ay_o vx_o vy_o (odom frame) seems reasonable. the value drift off quite large after robot stop.
+
 	
 ----11/30/21 verify carto result with 'ground truth'------------------
 data:
-	turtlebot3_imuodompt2.bag
+	turtlebot3_imuodompt2.bag	36 sec
+	turtlebot3_imuodompt2_2.bag	33 sec, forward, left 90deg, forward.
 
 traj_turtlebot_imuodompt2.txt
 	traj2csv.py
@@ -79,9 +111,10 @@ record bag:
 play recorded bag:
 	roslaunch turtlebot3_slam/launch/turtlebot3_bringup_tf.launch
 	rosbag play turtlebot3_imuodompt2.bag --clock
+	rosbag play turtlebot3_imuodompt2_2.bag --clock
 
 test with carto:
-	roslaunch launch/launch/turtlebot3_3d.launch
+	roslaunch launch/turtlebot3_3d.launch
 	rosbag play turtlebot3_imuodompt2.bag --topics /imu /camera/depth/points /camera/depth/points:=/camera/depth/points2 /imu:=/mavros/imu/data --clock
 	carto node work, result no good. pt2 seems at z-axis, rotate needed? 
 	fixed:	create corresponding urdf for simplified turtlebot
@@ -91,11 +124,15 @@ test with carto:
 		play-pause bag file make cpu easy.
 	carto trajectory good up to 16 sec. at 17 sec the pt2 change too much
 		cause scan matching fail and result in bad traj.
+	turtlebot3_imuodompt2_2.bag result also have trouble. even the robot
+		movement and data suppose to be easy. the matching alg might
+		have trouble with dense pt2
 
 videos:
 	turtlebot3_gazebo_imupt2.mp4 -------- turtlebot3_house_bringup.launch
 	turtlebot3_gazebo_imupt2_recordbag.mp4 -------- record turtlebot3_imuodompt2.bag
-	turtlebot3_gazebo_imupt2_carto.mp4 -------- first carto test with turtlebot3_imuodompt2.bag 
+	turtlebot3_gazebo_imupt2_carto.mp4 -------- first carto test with turtlebot3_imuodompt2_2.bag 
+		
  
 
 see 9/4/2021 note
