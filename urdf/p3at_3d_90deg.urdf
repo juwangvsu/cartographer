@@ -1,21 +1,15 @@
 <!--
-  Copyright 2016 The Cartographer Authors
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
 
   p3at realsense and px4 links:
+	mavrosshort bag file
+	depth pt2 camera z-axis
 	lidar link: camera_depth_optical_frame
+		was:	x-axis -90 deg rot
+		camera z-axis == base_link y-axis. this is wrong: we want camera z-axis to be base_link x-axis
+		add z-axis -90 deg, now points show on base_link x-axis.	
 	imu link: base_link
+		x-axis 180 deg rot
+		imu x and base x is aligned.	
 -->
 
 <robot name="cartographer_backpack_3d">
@@ -61,13 +55,13 @@
   <joint name="imu_link_joint" type="fixed">
     <parent link="base_link" />
     <child link="imu_link" />
-    <origin xyz="0 0 0" rpy="3.1416 0 0" />
+    <origin xyz="0 0 0" rpy="0 0 3.1416" />
   </joint>
 
   <joint name="camera_depth_optical_frame_joint" type="fixed">
     <parent link="base_link" />
     <child link="camera_depth_optical_frame" />
-    <origin xyz="0.01 0. 0.19" rpy="-1.59 0.0 0.0" />
+    <origin xyz="0.01 0. 0.19" rpy="-1.59 0.0 -1.59" />
   </joint>
 
   <joint name="vertical_vlp16_link_joint" type="fixed">

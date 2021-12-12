@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # convert /tmpimu to /mavros/imu/data with frame_id=imu_link
+# and neg the z-acc value
+# for mavros_realsense_short.bag to mavrosshort_transcode.bag
 
 import rospy
 from std_msgs.msg import String
@@ -11,6 +13,7 @@ from sensor_msgs.msg import Imu, PointCloud2
 def callback(imudata):
    global imupub 
    imudata.header.frame_id='imu_link'
+   # z neg might not be necessary, or even wrong.
    imudata.linear_acceleration.z = -imudata.linear_acceleration.z
    imupub.publish(imudata)
 

@@ -1,9 +1,12 @@
+# change the frame_id of imu and pt2.
 #!/usr/bin/env python
 import rospy
 from std_msgs.msg import String
 import rosbag
 from std_msgs.msg import Int32, String
 from sensor_msgs.msg import Imu, PointCloud2
+
+# change the frame_id of imu and pt2.
 
 def callback2(pt2data):
    global pt2pub 

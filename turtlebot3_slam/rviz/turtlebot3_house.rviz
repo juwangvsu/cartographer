@@ -6,8 +6,8 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /Imu1
-        - /Imu1/Status1
+        - /TF1
+        - /TF1/Frames1
       Splitter Ratio: 0.5
     Tree Height: 285
   - Class: rviz/Selection
@@ -28,7 +28,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: Image
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -57,8 +57,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 2.4936423301696777
-        Min Value: -0.008349791169166565
+        Max Value: 0.3046610951423645
+        Min Value: -1.473221778869629
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -121,7 +121,7 @@ Visualization Manager:
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
-      Enabled: true
+      Enabled: false
       Links:
         All Links Enabled: true
         Expand Joint Details: false
@@ -132,7 +132,7 @@ Visualization Manager:
       Robot Description: robot_description
       TF Prefix: ""
       Update Interval: 0
-      Value: true
+      Value: false
       Visual Enabled: true
     - Class: rviz/Image
       Enabled: true
@@ -147,26 +147,58 @@ Visualization Manager:
       Unreliable: false
       Value: true
     - Class: rviz/Axes
-      Enabled: true
+      Enabled: false
       Length: 1
       Name: Axes
       Radius: 0.10000000149011612
       Reference Frame: <Fixed Frame>
-      Value: true
+      Value: false
     - Alpha: 1
       Class: rviz_plugin_tutorials/Imu
       Color: 204; 51; 204
-      Enabled: true
+      Enabled: false
       History Length: 1
       Name: Imu
       Topic: /imu
       Unreliable: false
+      Value: false
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        base_link:
+          Value: true
+        camera_depth_optical_frame:
+          Value: true
+        imu_link:
+          Value: false
+        odom:
+          Value: false
+        vertical_vlp16_link:
+          Value: false
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        base_link:
+          camera_depth_optical_frame:
+            {}
+          imu_link:
+            {}
+          vertical_vlp16_link:
+            {}
+        odom:
+          {}
+      Update Interval: 0
       Value: true
   Enabled: true
   Global Options:
     Background Color: 136; 138; 133
     Default Light: true
-    Fixed Frame: odom
+    Fixed Frame: base_link
     Frame Rate: 30
   Name: root
   Tools:
@@ -190,25 +222,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 13.986804008483887
+      Distance: 5.3203535079956055
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -1.214445948600769
-        Y: 3.4294593334198
-        Z: -2.778301239013672
+        X: -1.6106374263763428
+        Y: -0.5929352045059204
+        Z: -0.7755504250526428
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5697963237762451
+      Pitch: 0.5397966504096985
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.483583927154541
+      Yaw: 0.7885834574699402
     Saved: ~
 Window Geometry:
   Displays:
@@ -228,5 +260,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1200
-  X: 568
-  Y: 166
+  X: 329
+  Y: 61

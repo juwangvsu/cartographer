@@ -1,3 +1,147 @@
+------- 12/11/21 point cloud examination --------------
+pcd files from pc2 topic:
+      rosparam set /savemap_node/savecloud true 
+#do this multiple times while pause/run bag for multiple pcd files
+      rosparam set /savemap_node/savecloudonly true
+      cd test; rosrun hdl_graph_slam savecloud
+      rosbag play mavrosshort_transrecord.bag --topics /mavros/imu/data /camera/depth/points2  /camera/depth/points2:=/filtered_points
+           saved pcd: mapdata_3,4….pcd
+           view pcd: pcl_view mapdata_3.pcd
+
+(2) Run scan match:
+	cd /media/student/data6/cartographer/test
+	~/Documents/hdl_graph_slam/ndt/build/icp_example -pst=1 -if=mapdata_3.pcd -tf=mapdata_4.pcd -yawg=0.1 -xg=0 -rsl=0.02 -md=gicp -ms=-1
+
+ref:
+	hdl_graph_slam/readme, 3/9/21 note
+	"airsim gmapping hdl slam hector cartographer ndt icp robot_localization open3d", 12/11/21
+
+--------12/9/21  mavrosshort record 2 -----------
+  imu data z unchange in baglistener_mavrosshort2.py 
+  filter out msg with time glitch
+  bag record:	
+	- roscore; rosparam set /use_sim_time true
+	 -rosbag record -O mavrosshort_transrecord_2.bag /mavros/imu/data /camera/depth/points2	
+        -roslaunch depth_image_proc/depth_image_tmppt2.launch
+	 - python baglistener_mavrosshort2.py
+        -rosbag play mavros_realsense_short.bag /mavros/imu/data:=/tmpimu --clock
+  status: carto no longer crash, but result no good.
+
+--------12/9/21  mavrosshort carto debug -----------
+mavrosshort bag file
+p3at_3d_90deg.urdf camera link fixed , imu x-axis = base x-axis
+	but result still very bad.
+test10.csv
+	check imu data direction.
+	python imu2cvs.py test10.csv
+	rosbag play mavrosshort_transrecord.bag
+
+	record imu data to do some rough traj estimate by eye.
+	
+imu2csv_mavros.py
+test11.csv
+	python imu2csv_mavros.py test11.ods
+	rosbag play mavros_realsense_short.bag
+	progressing: convert /camera/imu and /mavros/imu/data to cvs
+		from mavros_realsense_short.bag and compare xyz-acc
+
+		observed /mavros/imu/data and /camera/imu have very different
+			time stamp value, this might also be the reason
+			for carto fail and crash. 
+			nope. mavrosshort_transrecode.bag's pt2 have the 
+			same time stamp as clock and imu data. 
+			crash reason:
+				/camera/depth/points2 time stamp glitch
+				 nsecs going backward.
+				this glitch @ mavros_realsense_short.bag
+				/camera/depth/image_rect_raw
+				    secs: 1636502986
+    				    nsecs: 558187962
+    				    secs: 1636502986
+    				    nsecs: 557096004
+
+
+
+see 11/26/21 note for view and carto
+
+----------12/9/21 turtlebot3 carto imu_link update ---
+turtlebot3_imuodompt2_3.bag
+turtlebot3_3d.urdf:
+	imu_link_joint no rot 
+
+test with carto:
+	roslaunch launch/turtlebot3_3d.launch
+	rosbag play turtlebot3_imuodompt2_3.bag --topics /imu /camera/depth/points /odom /camera/depth/points:=/camera/depth/points2 /imu:=/mavros/imu/data /odom:=/odom_gt --clock
+
+result:
+	carto result up to 7.5 sec good 
+	carto scan match no good from 11. when do turtle rotate 45 deg
+	carto result ok during the second seg of forward movement
+Video:
+	turtlebot3_gazebo_imupt2_carto_2.mp4
+
+ref:
+	11/29/21 note 
+
+---------- turtlebot3_imuodompt2_3.bag imu odom examination --------
+movement pattern:
+	xy_odom plot: start time 75.5 sec,
+	move forward (x-axis), rot 45 deg, move forward
+	turtle only capable of x_body move, no y_axis movement
+	start move at 77.4 sec ( x-acc +), stop at 82.8800 sec (x-acc -)
+	rot, move again at 92.2 sec, stop at 97.7 sec, notice 
+	(x-acc_body >x-acc_odom) due to orientation change
+	meanwhile y-acc_body < y-acc_odom 
+
+test9.ods:
+	shows that odom and imu are consistent in x-y-z values. imu x-acc is align with odom x-axis value. the stock urdf in gazebo run actually has base_link and imu_link almost overlapping. 
+in current carto and view setup for this bag file, the urdf has imu_link 180 deg x-axis rot from base_link, thus the inconsistent between imu data and odom.
+
+-------------12/7/21 bag file conversion imu data cross ref ----
+b3-2016-02-02-13-32-01.bag -
+	--filter to keep two topics 
+	  --> b3_rerecord.bag i
+		--> change frameid 
+		  --> b3_transrecord.bag
+			carto: p3at_3d_b3bag.launch
+			base_link->imu_link [-180.000, -0.000, 0.000]
+   imu z-acc = -9.8
+   baglistener.py -> b3_transrecord.bag
+
+turtlebot3_imuodompt2.bag
+	- recorded from gazebo
+	     carto: turtlebot3_3d.launch
+	     base_link->imu_link [-180.000, -0.000, 0.000]
+   imu z-acc = 9.8
+
+mavros_realsense_short.bag
+   imu z-acc =9.8
+	--> change frame id, neg z-acc value
+	mavrosshort_transrecord.bag
+   		imu z-acc = -9.8
+   baglistener_mavrosshort.py
+
+---------12/6/21 urdf, bagfile, launch file cross ref ---
+backpack_2d.urdf
+backpack_3d.urdf
+p3at_3d_90deg.urdf
+        bag: mavrosshort_ bag files
+        lidar x-axis -90 deg rotate followed by z-axis -90 deg
+        p3at_3d_90deg.launch
+        p3at_bringup_tf.launch
+p3at_3d.urdf
+        bag: b3_...bag files.
+        p3at_3d_b3bag.launch
+        p3at_3d.launch
+turtlebot3_3d.urdf
+        bag: turtlebot3_imuodompt2_3.bag
+        simplified with 3d lidar
+        turtlebot3_3d.launch (carto)
+	turtlebot3_slam/launch/turtlebot3_bringup_tf_simpleurdf.launch (view)
+turtlebot3_simple.urdf
+        simplified with 2d lidar
+        turtlebot3_2d.launch
+
 ----12/5/21 mavrosshort_.bag carto test ---
 mavrosshort_transrecord.bag
 see 11/26/21 note
@@ -31,7 +175,10 @@ assume orientation know from the odom topic.
 		convert imu and odom topic to csv
 	test3.csv: 
 		converted from topics from turtlebot3_3_gazebo.bag
+	test9.csv: 
+		converted from topics from turtlebot3_imuodompt2_3.bag
 	odomimutf_example.py
+		code sniplet tf quaternion
 
 turtlebot3_3_gazebo.bag: when vehicle rotate-move, the x-acc and y-acc is not clear-cut
 	iinitial pose: -90deg z-axis
@@ -66,6 +213,8 @@ test8.ods: forward movement, orientation 45 deg z-axis. ax ay similar to test6, 
 data:
 	turtlebot3_imuodompt2.bag	36 sec
 	turtlebot3_imuodompt2_2.bag	33 sec, forward, left 90deg, forward.
+	turtlebot3_imuodompt2_3.bag
+		 depth is z-axis of camera_depth_optical_frame
 
 traj_turtlebot_imuodompt2.txt
 	traj2csv.py
@@ -114,14 +263,17 @@ record bag:
 	roslaunch turtlebot3_slam/launch/turtlebot3_house_bringup.launch 
 	rosbag record -O turtlebot3_imuodompt2.bag /scan /odom /imu /camera/rgb/camera_info /camera/rgb/image_raw/compressed /camera/depth/camera_info /camera/depth/image_raw /camera/depth/points
 
-play recorded bag:
+play view bag:
+	*roslaunch turtlebot3_slam/launch/turtlebot3_bringup_tf_simpleurdf.launch
+		simpleurdf is the same urdf as turtlebot3_3d.launch
 	roslaunch turtlebot3_slam/launch/turtlebot3_bringup_tf.launch
+		use stock turtlebot3 urdf wt gazebo tag
 	rosbag play turtlebot3_imuodompt2.bag --clock
 	rosbag play turtlebot3_imuodompt2_3.bag --clock
 
 test with carto:
 	roslaunch launch/turtlebot3_3d.launch
-	rosbag play turtlebot3_imuodompt2.bag --topics /imu /camera/depth/points /camera/depth/points:=/camera/depth/points2 /imu:=/mavros/imu/data --clock
+	rosbag play turtlebot3_imuodompt2_3.bag --topics /imu /camera/depth/points /camera/depth/points:=/camera/depth/points2 /imu:=/mavros/imu/data --clock
 	carto node work, result no good. pt2 seems at z-axis, rotate needed? 
 	fixed:	create corresponding urdf for simplified turtlebot
 		turtlebot3_3d.urdf camera_depth_optical_frame_joint
@@ -171,13 +323,16 @@ transcode mavros_realsense_short.bag to have the same topics and
 
   view bag file:
 	roslaunch launch/p3at_bringup_tf.launch 
+		p3at_3d_90deg.urdf
 	rosbag play mavrosshort_transrecord.bag --topics /mavros/imu/data /camera/depth/points2  /mavros/imu/data:=/imu /camera/depth/points2:=/camera/depth/points --clock 
+	rosbag play b3_transrecord.bag --topics /mavros/imu/data /camera/depth/points2  /mavros/imu/data:=/imu /camera/depth/points2:=/camera/depth/points --clock 
 
   test:
-	-	camera_depth frame rotated so the pt looks normal
+	- camera_depth frame rotated so the pt looks normal at base x-axis
 		p3at_3d_90deg.urdf
 	- roslaunch launch/p3at_3d_90deg.launch
 	- rosbag play mavrosshort_transrecord.bag --clock
+	- rosbag play mavrosshort_transrecord_2.bag --clock
 	status:
 		fixed:	carto node seems received the imu and pt2 data
 		but fail to calculate, another issue with clock
@@ -206,7 +361,7 @@ steps:
 	- roscore; rosparam set /use_sim_time true
 	- rosbag record  -O b3_rerecord.bag /imu /horizontal_laser_3d
 	- roslaunch launch/demo_backpack_3d_nobag.launch
-	- rosbag play b3_rerecord.bag --clock
+	- rosbag play b3-2016-02-02-13-32-01.bag --clock
 
 idea: convert b3_rerecord.bag to change frame_id field to test it with
 	p3at_3d.launch
@@ -240,6 +395,10 @@ status:
 		p3at_3d_b3bag.launch use p3at_3d_b3bag.lua
 		p3at_3d.launch use p3at_3d.lua
 			num_accumulated_range_data = 1 or 160 dep on bag files
+
+	view bag file:
+		roslaunch launch/p3at_b3bag_bringup_tf.launch
+		rosbag play b3_transrecord.bag --topics /mavros/imu/data /camera/depth/points2  /mavros/imu/data:=/imu /camera/depth/points2:=/camera/depth/points --clock 
 
 TBD: 
      then tinker the mavros_realsense_short.bag,

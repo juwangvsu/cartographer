@@ -3,9 +3,6 @@
   turtlebot3_imuodompt2.bag links:
 	lidar link: camera_depth_optical_frame
 	imu link: base_link
-
-	12/9/21 imu_link_joint was 180 deg rot x-axis, might need to change to 
-	no rot for turtlebot3 bag files.
 -->
 
 <robot name="cartographer_backpack_3d">
@@ -51,13 +48,13 @@
   <joint name="imu_link_joint" type="fixed">
     <parent link="base_link" />
     <child link="imu_link" />
-    <origin xyz="0 0 0" rpy="0 0 0" />
+    <origin xyz="0 0 0" rpy="3.1416 0 0" />
   </joint>
 
   <joint name="camera_depth_optical_frame_joint" type="fixed">
     <parent link="base_link" />
     <child link="camera_depth_optical_frame" />
-    <origin xyz="0.01 0. 0.19" rpy="1.571 3.142 1.571" />
+    <origin xyz="0.01 0. 0.19" rpy="1.571 0. -1.571" />
   </joint>
 
   <joint name="vertical_vlp16_link_joint" type="fixed">

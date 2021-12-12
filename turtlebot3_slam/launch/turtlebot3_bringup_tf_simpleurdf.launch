@@ -6,11 +6,14 @@
   <arg name="open_rviz" default="true"/>
  <param name="/use_sim_time" value="true"/>
 
-  <!-- p3at load up urdf to /robot_description
--->
 <arg name="multi_robot_name" default=""/>
+
+  <!-- TurtleBot3 load up urdf to /robot_description
+-->
+
   <param name="robot_description"
-    textfile="/home/student/Documents/cartographer/urdf/p3at_3d_90deg.urdf" />
+    textfile="/home/student/Documents/cartographer/urdf/turtlebot3_3d_test.urdf" />
+
 
   <!-- both robot_state_publisher and joint_state_publisher needed to publish the whole tf tree. without 
 joint_state_publisher, revolute joint will not be in tf tree 
