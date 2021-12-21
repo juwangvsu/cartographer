@@ -1,8 +1,22 @@
+------- 12/20/21 generate point cloud odom for deepvo --------------
+lenova2:
+from turtlebot3_imuodompt2_3.bag bag file
+  take pc2 and odom data, synced
+	(1) cd test/turtlebot3_imuodompt2_3; rosrun hdl_graph_slam savecloud
+	(2) ~/Documents/cartographer/; ./savecloud.sh
+	(3) ~/Documents/cartographer/; rosbag play turtlebot3_imuodompt2_3.bag --topics /odom /camera/depth/points /camera/depth/points:=/filtered_points 
+		wait for complete, now have .pcd and yaml files
+	(4) test/turtlebot3_imuodompt2_3$ ../../pcd2pcl_clean.sh 
+		this convert pcd to ply files
+
 ------- 12/11/21 point cloud examination --------------
-pcd files from pc2 topic:
-      rosparam set /savemap_node/savecloud true 
-#do this multiple times while pause/run bag for multiple pcd files
+(1) pcd files from pc2 topic:
+       rosparam set /savemap_node/savecloud true 
+	# run savecloud.sh to save 100 pcd files.
+	# or do this multiple times while pause/run bag for multiple pcd files
       rosparam set /savemap_node/savecloudonly true
+	this param is used in hdl_graph_slam/savecloud
+	to use only point cloud. else it will save odom too.
       cd test; rosrun hdl_graph_slam savecloud
       rosbag play mavrosshort_transrecord.bag --topics /mavros/imu/data /camera/depth/points2  /camera/depth/points2:=/filtered_points
            saved pcd: mapdata_3,4….pcd
