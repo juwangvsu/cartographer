@@ -1,31 +1,140 @@
+------- 12/21/21 verify pose info / apply to pcd files --------------
+script:
+	verifypose.py: calculate relative transformation between two pair
+		of (pc_0, posei_0) and (pc_1, posei_1)
+	filter_floor.py: remove floor points from pcd file
+
+Pcl_viewer to view two clouds
+Pcl_viewer  -fc 0,0,255 mapdata_6.pcd  -fc 0,255,0 test.pcd
+
+--------------12/20/21 python-pcl build-------------------------
+homepc
+python binding of pcl library. not upto date maintained.
+prebuild pkg is for pcl1.7, build from source have link problem
+workaround by change setup.py
+build/install for 2 pyenv: 2.7.17 and miniconda
+
+Build step:
+	pyenv shell miniconda3-latest
+		or 2.7.17
+	git clone the repo.
+	modifiy setup.py
+	python setup.py install
+		this will compile and install @ current python env.
+
+ref:
+	"readme pointcloud ndt icp slam cartographer code "
+	2.7 pyenv also add some rospy pkgs: pyyaml rospkg rospy
+		rosdep rosinstall_generator wstool rosinstall wheel 
+		pycryptodome pycryptodomex gnupg cython	
+	
 ------- 12/20/21 generate point cloud odom for deepvo --------------
 lenova2:
 from turtlebot3_imuodompt2_3.bag bag file
+results:
+	.pcd; yaml; .ply
+
   take pc2 and odom data, synced
-	(1) cd test/turtlebot3_imuodompt2_3; rosrun hdl_graph_slam savecloud
-	(2) ~/Documents/cartographer/; ./savecloud.sh
-	(3) ~/Documents/cartographer/; rosbag play turtlebot3_imuodompt2_3.bag --topics /odom /camera/depth/points /camera/depth/points:=/filtered_points 
-		wait for complete, now have .pcd and yaml files
-	(4) test/turtlebot3_imuodompt2_3$ ../../pcd2pcl_clean.sh 
-		this convert pcd to ply files
+        (1) cd test/turtlebot3_imuodompt2_3; rosrun hdl_graph_slam savecloud
+        (2) ~/Documents/cartographer/; ./savecloud.sh
+        (3) ~/Documents/cartographer/; rosbag play turtlebot3_imuodompt2_3.bag --topics /odom /camera/depth/points /camera/depth/points:=/filtered_points
+                wait for complete, 
+        (4) test/turtlebot3_imuodompt2_3$ ../../pcd2pcl_clean.sh
+                this convert pcd to ply files
+
+ref: 12/11/21 note (2)
+
+------12/14/21 convert pcd file to ply  ---------
+	ply to be open by meshlab, to manuelly remove
+	floor points to test icp or ceres
+	cartographer/test/mavros_realsense_pcd$ ../../pcd2pcl_clean.sh
+	meshlab mapdata_45_.ply
+	click "vertex select" button, now use mouse to highlight the area
+		of vertex, click "delete selected vertex"
+		save to ply (select ascii format)
+	
+------12/11/21 hacking ceres_scan_matcher_3d_test.cc ---------a
+homepc
+/media/student/data6/catkin_ws/src/cartographer`
+to test pcd files
+        - add pcl library to the CMakeLists.txt
+        - it seems work. pcl code works fine inside the test code
+to rebuild:
+        cd build; cmake ..; ninja
+to run test:
+        cd build
+        ./cartographer.mapping.internal.3d.scan_matching.ceres_scan_matcher_3d_test
+
+	ceres weakness:
+		very few points (e.g., 2 or 3 points no good)
+		undistinguishable points
+TBD:
+	ceres in carto vs  ceres in test code.
+
+ref: my repo cartographer-1's readme
 
 ------- 12/11/21 point cloud examination --------------
+scan match pc2 obs:
+	-using icp_example for scan match
+	-turtlebot pc2 result good if two pc2 relative close
+	-mavros_realsense_short pc2 result bad
+TBD:
+	- remove floor points for mavros_realsense_short pc2	
+	- further check carto scan matching part, if possible 
+	  seperate that code for testing on pcd files. 
+
 (1) pcd files from pc2 topic:
-       rosparam set /savemap_node/savecloud true 
-	# run savecloud.sh to save 100 pcd files.
-	# or do this multiple times while pause/run bag for multiple pcd files
+       rosparam set /savemap_node/savecloud true
+        # run savecloud.sh to save 100 pcd files.
+        # or do this multiple times while pause/run bag for multiple pcd files
       rosparam set /savemap_node/savecloudonly true
-	this param is used in hdl_graph_slam/savecloud
-	to use only point cloud. else it will save odom too.
+        this param is used in hdl_graph_slam/savecloud
+        to use only point cloud. else it will save odom too.
       cd test; rosrun hdl_graph_slam savecloud
       rosbag play mavrosshort_transrecord.bag --topics /mavros/imu/data /camera/depth/points2  /camera/depth/points2:=/filtered_points
            saved pcd: mapdata_3,4….pcd
            view pcd: pcl_view mapdata_3.pcd
 
-(2) Run scan match:
-	cd /media/student/data6/cartographer/test
-	~/Documents/hdl_graph_slam/ndt/build/icp_example -pst=1 -if=mapdata_3.pcd -tf=mapdata_4.pcd -yawg=0.1 -xg=0 -rsl=0.02 -md=gicp -ms=-1
+(2) get ~100 pcd from bag file: (0.3 sec interval)
+	(a) cd cartographer/test/turtlebot3_pcd
+        (b) rosparam set /savemap_node/savecloudonly true
+		for mavrosshort_transrecord.bag
+	(c) rosrun hdl_graph_slam savecloud 
+	(d) cartographer$ ./savecloud.sh 
+	(e) rosbag play turtlebot3_imuodompt2_3.bag /camera/depth/points:=/filtered_points --clock
 
+(3) Run scan match:
+	cd /media/student/data6/cartographer/test/
+	~/Documents/hdl_graph_slam/ndt/build/icp_example -pst=1 -if=mapdata_3.pcd -tf=mapdata_4.pcd -yawg=0.1 -xg=0 -rsl=0.02 -md=gicp -ms=-1
+	turtlebot3_pcd$ ~/Document/hdl_graph_slam/ndt/build/icp_example -pst=1 -if=mapdata_32.pcd -tf=mapdata_46.pcd -yawg=0.1 -xg=0 -rsl=0.02 -md=gicp -ms=-1
+
+mappose_46.yaml
+	quat: [ -0.000706, 0.0011278, 0.5312124, 0.8472376 ]
+	xyz: [-1.4950, 1.7832, -0.0010]
+	euler: [ x: -0.1371952, y: 0.066518, z: 64.1749599 ]
+mappose_32.yaml
+	quat: [-0.0006 , 0.00116, 0.488896, 0.87234]
+	xyz: [-1.8752, 0.99411, -0.00101]
+	euler: [ x: -0.1249652, y: 0.082343, z: 58.5362951 ]a
+icp_example result:
+	R=[
+   	0.995116 0.000250801    -0.09871  -0.0950297
+	-0.00025028           1 1.78665e-05 -0.00231355
+  	0.0987101 6.92345e-06    0.995116    0.875233
+          0           0           0           1
+	]
+	quat [-2.73911e-06 -0.0494154 -0.000125424 0.998778]
+	euler: [ x: -0.0010287, y: -5.6648966, z: -0.014441 ]
+	xyz trans: [-0.0950297 -0.00231355 0.875233]
+(3.b) 
+	mavros_short pc2 #3 and #14 also pretty good.
+	mavros_realsense_pcd$ ~/Documents/hdl_graph_slam/ndt/build/icp_example -pst=1 -if=mapdata_3.pcd -tf=mapdata_14.pcd -yawg=0.1 -xg=0 -rsl=0.02 -md=gicp -ms=-1
+	
+obs:
+	the icp result is good for mapdata_32.pcd and mapdata_46.pcd
+	note the point cloud is on camera frame, whose z-axis is 
+	the odom frame x-axis, and its y-axis is odom's -z-axis .so the 
+	rotation calculated by icp_example is on y-axis
 ref:
 	hdl_graph_slam/readme, 3/9/21 note
 	"airsim gmapping hdl slam hector cartographer ndt icp robot_localization open3d", 12/11/21
