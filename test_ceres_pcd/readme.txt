@@ -1,7 +1,12 @@
+---------------1/13/22 -------------------------------------
 cartographer/test_ceres_pcd
+	1-10-22/  hgrid no miss point
+	1-6-22/   hgrid contain miss data point	
         scan_test_h.pcd
         submap_test_h.pcd
         readme.txt
+	sweep3.ods		costfun plot sweeping init pos, see cartographer scanmatch test example.
+			cartographer/build$ ./cartographer.mapping.internal.3d.scan_matching.ceres_scan_matcher_3d_test
 
 two snap shot pcd file:
 pcl_viewer  -fc 0,0,255 scan_test_h.pcd  -fc 0,255,0 submap_test_h.pcd

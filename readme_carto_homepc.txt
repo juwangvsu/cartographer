@@ -1,7 +1,7 @@
 ------- 1/7/22 test.cc compile_testi2.sh --------------
 test.cc:
 	add some Eigen test code
-------- 1/7/22 carto scanmatch debug ceres --------------
+------- 1/7-14/22 carto scanmatch debug ceres --------------
 cartographer/test_ceres_pcd
 	scan_test_h.pcd --- saved at ScanMatch call
 	submap_test_h.pcd --- saved at ScanMatch call
@@ -54,9 +54,8 @@ status:
 		-0.096398 0.111561 -0.0720986 (low+high)
 		-0.174376 -0.0790631 -0.198817 (low resolution)
 		0.403925 0.382077 -1.66027 (high resolution), not even close
-
-
-
+TBD:
+	sweep with both x and y and plot: sweep4.ods
 	test with actual high/low resolution data
 	
 ------- 1/4/22 carto scan hybrid_grid submap debug --------------
