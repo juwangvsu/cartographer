@@ -11,7 +11,9 @@ Panels:
         - /RobotModel1/Links1/base_link1
         - /Submaps1
         - /PointCloud23/Autocompute Value Bounds1
+        - /Odometry_gt1
         - /Odometry_gt1/Shape1
+        - /Odometry1
         - /Odometry1/Shape1
       Splitter Ratio: 0.6006709933280945
     Tree Height: 391
@@ -197,10 +199,10 @@ Visualization Manager:
       Submap query service: /submap_query
       Submaps:
         All: true
+        All Submap Pose Markers: true
         Trajectory 0:
-          0.320: true
-          1.319: true
-          2.159: true
+          0.6: true
+          Submap Pose Markers: true
           Value: true
       Topic: /submap_list
       Tracking frame: base_link
@@ -286,9 +288,9 @@ Visualization Manager:
         Axes Length: 1
         Axes Radius: 0.10000000149011612
         Color: 245; 121; 0
-        Head Length: 0.30000001192092896
+        Head Length: 0.029999999329447746
         Head Radius: 0.10000000149011612
-        Shaft Length: 0.20000000298023224
+        Shaft Length: 0.019999999552965164
         Shaft Radius: 0.05000000074505806
         Value: Arrow
       Topic: /odom_gt
@@ -356,25 +358,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 8.366582870483398
+      Distance: 9.16088581085205
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.9120414853096008
-        Y: 1.5027369260787964
-        Z: 1.1861324310302734e-5
+        X: -1.7658990621566772
+        Y: 2.9013049602508545
+        Z: 1.2218952178955078e-5
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5497963428497314
+      Pitch: 1.0697968006134033
       Target Frame: <Fixed Frame>
       Value: XYOrbit (rviz)
-      Yaw: 2.8753931522369385
+      Yaw: 2.6403861045837402
     Saved: ~
 Window Geometry:
   Displays:

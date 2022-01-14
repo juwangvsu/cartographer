@@ -1,0 +1,15 @@
+	 init_xyz  -1 0.0278726 -0.0228209 residual 126.658 ceres init cost 77.2009
+	 init_xyz  -0.9 0.0278726 -0.0228209 residual 126.405 ceres init cost 77.0469
+	 init_xyz  -0.8 0.0278726 -0.0228209 residual 124.974 ceres init cost 76.1743
+	 init_xyz  -0.7 0.0278726 -0.0228209 residual 102.332 ceres init cost 62.3739
+	 init_xyz  -0.6 0.0278726 -0.0228209 residual 63.9616 ceres init cost 38.9861
+	 init_xyz  -0.5 0.0278726 -0.0228209 residual 32.1784 ceres init cost 19.6135
+	 init_xyz  -0.4 0.0278726 -0.0228209 residual 15.2156 ceres init cost 9.27427
+	 init_xyz  -0.3 0.0278726 -0.0228209 residual 8.62869 ceres init cost 5.25939
+	 init_xyz  -0.2 0.0278726 -0.0228209 residual 8.84012 ceres init cost 5.38826
+	 init_xyz  -0.1 0.0278726 -0.0228209 residual 22.1409 ceres init cost 13.4954
+	 init_xyz  0 0.0278726 -0.0228209 residual 51.7748 ceres init cost 31.5579
+	 init_xyz  0.1 0.0278726 -0.0228209 residual 86.4624 ceres init cost 52.7009
+	 init_xyz  0.2 0.0278726 -0.0228209 residual 102.664 ceres init cost 62.5761
+	 init_xyz  0.3 0.0278726 -0.0228209 residual 106.14 ceres init cost 64.695
+

@@ -1,3 +1,196 @@
+------- 1/7/22 test.cc compile_testi2.sh --------------
+test.cc:
+	add some Eigen test code
+------- 1/7/22 carto scanmatch debug ceres --------------
+cartographer/test_ceres_pcd
+	scan_test_h.pcd --- saved at ScanMatch call
+	submap_test_h.pcd --- saved at ScanMatch call
+	readme.txt
+	sweep3.ods  --- costfunc plot of sweeping the init pose 
+	
+ceres_scan_matcher_3d_test.cc
+	new test code to scanmatch the above two pcd clouds.
+	show two clouds together before and after
+
+    ref:
+	/media/student/data6/catkin_ws/src/cartographer/readme.txt
+	
+
+two snap shot pcd file: 
+pcl_viewer  -fc 0,0,255 scan_test_h.pcd  -fc 0,255,0 submap_test_h.pcd
+cd /media/student/data6/catkin_ws/src/cartographer/build
+	./cartographer.mapping.internal.3d.scan_matching.ceres_scan_matcher_3d_test
+
+status: 
+	ceres_scan_matcher_3d_test scanmatch result not as expected.
+		could be resolution and scanmatch setup.
+		after get a reasonable result, try to fine tune
+		ex. submap with miss points removed.
+	icp_example match result also show the impact of the miss points.
+	
+	hgrid_res: 0.2 in testopt2.txt
+	main code add lua option: hgrid_pcd_probthresh = 0.5
+		will exclude most miss point to be dumped to pcd file
+		for test.
+	hgrid resolution affect ceres scan match. if too small, not work at all.
+	increase 0.5 allow ceres to find a close one. but low resolution
+	result in less accurate result.
+
+	add low resolution submap and scan in the residue block: hopefully the 
+		low resol will search to a rough match, then high resol part
+		further increase the match result.
+	
+
+	scanmatchtest now has three mode of scanmatch: (1) high reso, (2) low resol, (3) both resolutions. (4): low resol first, then high reso, not together. option twostep: 1|0. the grid size and initial pose must be similar. 
+	the result of (3) and (4) same? 
+
+	add code to perform sweep gride size, 0.5 vs 0.15
+		cost func plot see sweep3.ods. at low hgrid res, it is smooth
+		at fine resolution, the cost fun have many local mins.
+		this explained why ceres opt fail and inconsisitant
+		at high res grid size
+		specific ex where low+high result in a great result:
+		initpose: 0.65 0.0278726 -0.0228209 
+		-0.096398 0.111561 -0.0720986 (low+high)
+		-0.174376 -0.0790631 -0.198817 (low resolution)
+		0.403925 0.382077 -1.66027 (high resolution), not even close
+
+
+
+	test with actual high/low resolution data
+	
+------- 1/4/22 carto scan hybrid_grid submap debug --------------
+local_trajectory_builder_3d.cc:
+	hybridgrid_2_pcd()
+	scan_2_pcd()
+	submap_2_pcd()
+
+dump the scan and submap to pcd files for examination:
+	- before ScanMatch, the input scan are voxel filtered. so it is
+	sparse than the raw input cloud.
+	- the submap dumped indicate bad alignment, turtlebot data
+	  show multiple walls while there should be a thin wall
+	turtlebot3 start move the 2 sec. yet submap already show 3 unaligned
+	slice at 3 second. check insert point code
+
+debug code/files:
+  ~/Documents/cartographer/
+	sync_rangedata.pcd: data(0) 76800 pts, original resolution
+	submap_test_l.pcd
+	submap_test_h.pcd
+		submap hybrid_grid dump, high reso, update each scan 
+		contain both hit and miss points. to exclude miss points
+		hitprobthresh = 0.5, otherwise hitprobthresh=0.1
+		see hybridgrid_2_pcd(), 900 pts, data(3)x3
+	scan_test_l.pcd
+	scan_test_h.pcd:	current scan dump, called inside ScanMatch()
+				starting from 2nd scan data, data(1)
+	test/scan_hrt_%.pcd:	current scan filtered? in AddAccumulatedRangeData(), data(1), 163 pts
+	test/filtered_range_data_in_tracking.pcd:
+				data(3), 348 pts
+
+cloud data processsing/flow:
+	data (3)(2)(1) all very similar. all sparse
+	(0) unsynchronized_data.ranges, 76800 pts. 
+		passed from ros 
+		PointCloud2 converted to carto::TimedPointCloudData. 
+	(1) high_resolution_point_cloud_in_tracking, 163 pts
+	(2) filtered_range_data_in_local,
+	(3) filtered_range_data_in_tracking, filtered, 348 pts
+	processing: 
+		func (b): data(3) ---adaptive filter voxel --> data(1)
+		func (b): data(3) ---frame trans  --> data(2) 
+		func (e): data(0) --- voxel filter ---> data(3)
+	LocalTrajectoryBuilder3D::
+	(a) --call--> (e) (b)
+	(b) --call --> (c) (d)
+
+	(a) AddRangeData(data(0))
+	(b) AddAccumulatedRangeData(data(3))
+	(c) ScanMatch(data(1))
+	(d) InsertIntoSubmap(data(1,2,3))
+	(e) VoxelFilter()
+
+options:
+	map_builder.lua
+	pose_graph.lua
+	trajectory_builder.lua
+	trajectory_builder_3d.lua
+
+submap creation/update:
+	submap point probability change as new data is inserted. hit pts
+	start with 0.55, miss pts start with 0.49, if the same hit
+	pts are observed again in new scan, the prob goes up. similary,
+	if the same miss pts are observed, the prob goes down.
+	after 10 or so scan, hit pts typically > 0.7, miss pts prob <0.3
+	hit pts mean obstacle, miss pts mean no obstacle.
+
+   mapping/3d/range_data_inserter_3d.cc:
+	InsertMissesIntoGrid()
+	due to the insertion of the miss points, the submap has close to 3x
+	points than scan. the miss points prob 0.49, the hit points prob 0.55
+	when responding to submap inquery, ExtractVoxelData() only return points
+	whose prob>0.501f (see 3d/submap_3d.cc)
+
+------- 1/3/22 carto scanmatch debug --------------
+debugging info:
+	mapping/internal/3d/scan_matching/
+		ceres_scan_matcher_3d.cc
+		local_trajectory_builder_3d.cc
+use 1/1/22 filter to 'slow down' freq of points to observe match result.
+print fullreport and estimated pose difference.
+	turtlebot3 bag pub pc2: 60 hz.
+	carto still work with skipcnt=60 or 120
+
+TBD:
+	dump submap to pcd file
+	local_trajectory_builder_3d.cc
+	cartographer/io/pcd_writing_points_processor.cc
+
+ScanMatch initial pose: from imu projection, converted to body frame
+  submap contain pose data, hybrid_grid don't have pose data.
+  so when match pc to hybrid_grid, the initial pose must be in body frame.
+  in turtlebot data, the first submap pose overlap the odom frame 	
+  submap version # update (+1) after each pc insertion. 
+
+------- 1/2/22 carto pkg build tip --------------
+tip: PCL package must be added to CMakeLists.txt for 
+	if want to use PCL's full library (such as PCD)
+	cartographer
+	cartographer_ros
+	cartographer_rviz
+
+------- 1/2/22 carto submap debug --------------
+see 11/12/2021 cartographer bag study, submap
+
+----------1/1/22 turtlebot3 pt2 frame filter -------------
+python code to control which pc2 frame go through.
+skipcnt: param, how many pc2 to skip
+	turtlebot3 bag file 60hz for pc2 
+roslaunch launch/turtlebot3_3d.launch cartover:=2.0.0
+rosparam set skipcnt 10; python baglistener_filterpc2.py
+rosbag play turtlebot3_imuodompt2_3.bag --topics /imu /camera/depth/points /odom /camera/depth/points:=/tmppt2 /imu:=/mavros/imu/data /odom:=/odom_gt --clock
+
+filter:
+	baglistener_filterpc2.py  --- repub pt2 topic after filter
+
+------- 1/2/22 carto stock version 1.0.0 vs build 2.0.0 --------------
+build from source version 2.0.0
+	lua file different. if launch file use 1.0.0 lua file, error
+	about certain parameters if use 2.0.0 carto node.
+
+	rosversion cartographer
+
+fix: launch file check carto version.
+------- 12/29/21 ceres-solve --------------
+homepc:Documents/ceres-solver
+Build:
+	mkdir ceres-bin; cd ceres-bin; cmake ..; make
+Test:
+	cd ceres-bin/bin; ./hellowworld
+
+test Jet class
+
 ------- 12/21/21 verify pose info / apply to pcd files --------------
 script:
 	verifypose.py: calculate relative transformation between two pair
@@ -17,11 +210,15 @@ build/install for 2 pyenv: 2.7.17 and miniconda
 Build step:
 	pyenv shell miniconda3-latest
 		or 2.7.17
+		pyenv install 2.7.17
 	git clone the repo.
+	cd python-pcl
 	modifiy setup.py
+		cp ~/Documents/miscfiles/python-pcl/setup.py .
 	python setup.py install
 		this will compile and install @ current python env.
-
+		2.7 env might error when install filelock pkg. seems safe
+		to ignore.
 ref:
 	"readme pointcloud ndt icp slam cartographer code "
 	2.7 pyenv also add some rospy pkgs: pyyaml rospkg rospy
@@ -106,6 +303,9 @@ TBD:
 (3) Run scan match:
 	cd /media/student/data6/cartographer/test/
 	~/Documents/hdl_graph_slam/ndt/build/icp_example -pst=1 -if=mapdata_3.pcd -tf=mapdata_4.pcd -yawg=0.1 -xg=0 -rsl=0.02 -md=gicp -ms=-1
+		-tf: target frame, -if: reference frame, i
+		result translation is to move tf to if
+
 	turtlebot3_pcd$ ~/Document/hdl_graph_slam/ndt/build/icp_example -pst=1 -if=mapdata_32.pcd -tf=mapdata_46.pcd -yawg=0.1 -xg=0 -rsl=0.02 -md=gicp -ms=-1
 
 mappose_46.yaml
@@ -130,6 +330,17 @@ icp_example result:
 	mavros_short pc2 #3 and #14 also pretty good.
 	mavros_realsense_pcd$ ~/Documents/hdl_graph_slam/ndt/build/icp_example -pst=1 -if=mapdata_3.pcd -tf=mapdata_14.pcd -yawg=0.1 -xg=0 -rsl=0.02 -md=gicp -ms=-1
 	
+(4) turtlebot3 point cloud ros msg ex:
+ from sensor_msgs.msg import Imu, PointCloud2
+# header:
+#  frame_id: "camera_depth_optical_frame"
+# height: 480
+# width: 640
+# fields" x,y,z, rgb
+# point_step: 32
+# row_step: 20480
+# data: [235 ...]
+
 obs:
 	the icp result is good for mapdata_32.pcd and mapdata_46.pcd
 	note the point cloud is on camera frame, whose z-axis is 
@@ -183,9 +394,15 @@ test11.csv
     				    secs: 1636502986
     				    nsecs: 557096004
 
-
-
 see 11/26/21 note for view and carto
+
+----------1/2/22 turtlebot3 pt2 frame filter -------------
+python code to control which pc2 frame go through.
+skipcnt: param, how many pc2 to skip
+	turtlebot3 bag file 60hz for pc2 
+roslaunch launch/turtlebot3_3d.launch cartover:=2.0.0
+osparam set skipcnt 10; python baglistener_filterpc2.py
+rosbag play turtlebot3_imuodompt2_3.bag --topics /imu /camera/depth/points /odom /camera/depth/points:=/tmppt2 /imu:=/mavros/imu/data /odom:=/odom_gt --clock
 
 ----------12/9/21 turtlebot3 carto imu_link update ---
 turtlebot3_imuodompt2_3.bag
@@ -194,6 +411,8 @@ turtlebot3_3d.urdf:
 
 test with carto:
 	roslaunch launch/turtlebot3_3d.launch
+	roslaunch launch/turtlebot3_3d.launch cartover:=2.0.0
+		if run non stock version of carto
 	rosbag play turtlebot3_imuodompt2_3.bag --topics /imu /camera/depth/points /odom /camera/depth/points:=/camera/depth/points2 /imu:=/mavros/imu/data /odom:=/odom_gt --clock
 
 result:
@@ -396,6 +615,8 @@ play view bag:
 
 test with carto:
 	roslaunch launch/turtlebot3_3d.launch
+	roslaunch launch/turtlebot3_3d.launch cartover:=2.0.0
+		if run non stock version of carto
 	rosbag play turtlebot3_imuodompt2_3.bag --topics /imu /camera/depth/points /camera/depth/points:=/camera/depth/points2 /imu:=/mavros/imu/data --clock
 	carto node work, result no good. pt2 seems at z-axis, rotate needed? 
 	fixed:	create corresponding urdf for simplified turtlebot
@@ -613,7 +834,7 @@ rosbag record /camera/motion_module/parameter_descriptions /camera/l500_depth_se
 
 see readme_nvidia_nano.txt 9/8/21 note
 
-----------11/12/2021 cartographer bag study -----
+----------11/12/2021 cartographer bag study, submap-----
 3d:
 	/horizontal_laser_3d
 	/vertical_laser_3d
@@ -627,6 +848,25 @@ see readme_nvidia_nano.txt 9/8/21 note
 to obtain a submap:
 rosservice call /submap_query "trajectory_id: 0
 submap_index: 0"  > submap_0.0.txt
+	submap_0.0.txt: contain high resolute (0.1 meter) 
+		and low resolute (0.45 meter), cell array cells: [31, 139, ...]
+		with pose, width, height
+		cell array is compressed string. 
+		debug cartographer_rviz plugin to dump uncompressed looks good.
+	ex:
+cell: reso/w/h: 0.45 9 10
+alpha:
+0 0 0 0 0 12 15 31 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 44 44 44 44 44 44 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+
+debug code:
+cartographer_ros/submap.cc	--- ros code to get submap data
+cartographer/mapping/3d/submap_3d.cc --- hybrid_grid to submap conversion
+std::string MapBuilder::SubmapToProto() --- gen response to query
+	submap_dbgflag //defined in 3d/submap_3d.cc
+	submap_query roscall with submap_id.submap_index>1000 or 2000 to
+		turn on/off dbgflag
+rosservice call /submap_query "trajectory_id: 0 submap_index: 2001"	
+rosservice call /submap_query "trajectory_id: 0 submap_index: 1001"	
 
 ----------11/8/2021 p3at gearup to collect bag data file -----
 	hardware: px4#1 (rover), px4#2 (imu src), pi4b, realsense sensor
@@ -805,6 +1045,10 @@ using ninja tool
 	this will download both cartographer and cartographer_ros
 	and build cartographer_ros
 
+	source install_isolated/setup.bash
+		to run carto node build here
+	PCL link issue: 
+	
 # To Build  Cartographer seperately (to access test)
 cd /media/student/data6/catkin_ws/src/cartographer
 mkdir build
