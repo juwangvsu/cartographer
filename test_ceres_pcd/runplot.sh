@@ -1,0 +1,1 @@
+gnuplot splot.p -p
