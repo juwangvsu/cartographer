@@ -98,8 +98,9 @@ def callback_pt2(pt2msg):
        #print('time glitch')
        return
    if pt2frames%skipcnt==0:
-       print("pub this pt2 frame len(pt2msg.data)/32:", len(pt2msg.data)/32)
+       print("pub this pt2 frame time",msgt1," len(pt2msg.data)/32:", len(pt2msg.data)/32)
        msgt1_prev=msgt1
+       saveodom()
        #print(pt2msg)
        print(struct.unpack("<B", pt2msg.data[0]))
        print(struct.unpack("<B", pt2msg.data[1]))
@@ -113,9 +114,9 @@ def callback_pt2(pt2msg):
        #pt2msg.data=pt2random
        pt2msg.data=pt2buf
 
-       print("pub this pt2 frame len(pt2msg.data)/32:", len(pt2msg.data)/32)
+   #    print("pub this pt2 frame len(pt2msg.data)/32:", len(pt2msg.data)/32)
        pt2pub.publish(pt2msg)
-       saveodom()
+       saveodom() # this odom is newer than the pt2, due to pt2 processing time
    pt2frames = pt2frames +1
 
 def callback(imumsg):
@@ -141,12 +142,12 @@ def saveodom():
         'qz':round(prevodom.pose.pose.orientation.z,fdigis),
         'qw':round(prevodom.pose.pose.orientation.w, fdigis)})
     outfile.flush()
-    print('msg time: ', prevmsg_t, 'odom.x', prevodom.pose.pose.position.x, prevodom.pose.pose.position.y)
+    print('odom msg time: ', prevmsg_t, 'odom.x', prevodom.pose.pose.position.x, prevodom.pose.pose.position.y)
 
 def callback3(odommsg):
     global odomsub, outfile, prevmsg_t, writer, prevodom, initodom 
     msg_t = odommsg.header.stamp.secs + 1.0*odommsg.header.stamp.nsecs/1000000000
-    if (msg_t-prevmsg_t) < 0.05:
+    if (msg_t-prevmsg_t) < 0.02:
         return
     prevmsg_t = msg_t
     if initodom is None:

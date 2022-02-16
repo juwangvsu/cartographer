@@ -48,24 +48,13 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /media/student/data6/cartographer/pcl-examples
+CMAKE_SOURCE_DIR = /home/student/Documents/cartographer/pcl-examples
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /media/student/data6/cartographer/pcl-examples/build
+CMAKE_BINARY_DIR = /home/student/Documents/cartographer/pcl-examples/build
 
 #=============================================================================
 # Targets provided globally by CMake.
-
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
-
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
-
-.PHONY : rebuild_cache/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -78,11 +67,22 @@ edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
 
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
+
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
+
+.PHONY : rebuild_cache/fast
+
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /media/student/data6/cartographer/pcl-examples/build/CMakeFiles /media/student/data6/cartographer/pcl-examples/build/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/student/Documents/cartographer/pcl-examples/build/CMakeFiles /home/student/Documents/cartographer/pcl-examples/build/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /media/student/data6/cartographer/pcl-examples/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/student/Documents/cartographer/pcl-examples/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -123,6 +123,19 @@ don_segmentation/fast:
 	$(MAKE) -f CMakeFiles/don_segmentation.dir/build.make CMakeFiles/don_segmentation.dir/build
 .PHONY : don_segmentation/fast
 
+#=============================================================================
+# Target rules for targets named pcl_visualizer_demo
+
+# Build rule for target.
+pcl_visualizer_demo: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 pcl_visualizer_demo
+.PHONY : pcl_visualizer_demo
+
+# fast build rule for target.
+pcl_visualizer_demo/fast:
+	$(MAKE) -f CMakeFiles/pcl_visualizer_demo.dir/build.make CMakeFiles/pcl_visualizer_demo.dir/build
+.PHONY : pcl_visualizer_demo/fast
+
 don_segmentation.o: don_segmentation.cpp.o
 
 .PHONY : don_segmentation.o
@@ -150,18 +163,49 @@ don_segmentation.cpp.s:
 	$(MAKE) -f CMakeFiles/don_segmentation.dir/build.make CMakeFiles/don_segmentation.dir/don_segmentation.cpp.s
 .PHONY : don_segmentation.cpp.s
 
+pcl_visualizer_demo.o: pcl_visualizer_demo.cpp.o
+
+.PHONY : pcl_visualizer_demo.o
+
+# target to build an object file
+pcl_visualizer_demo.cpp.o:
+	$(MAKE) -f CMakeFiles/pcl_visualizer_demo.dir/build.make CMakeFiles/pcl_visualizer_demo.dir/pcl_visualizer_demo.cpp.o
+.PHONY : pcl_visualizer_demo.cpp.o
+
+pcl_visualizer_demo.i: pcl_visualizer_demo.cpp.i
+
+.PHONY : pcl_visualizer_demo.i
+
+# target to preprocess a source file
+pcl_visualizer_demo.cpp.i:
+	$(MAKE) -f CMakeFiles/pcl_visualizer_demo.dir/build.make CMakeFiles/pcl_visualizer_demo.dir/pcl_visualizer_demo.cpp.i
+.PHONY : pcl_visualizer_demo.cpp.i
+
+pcl_visualizer_demo.s: pcl_visualizer_demo.cpp.s
+
+.PHONY : pcl_visualizer_demo.s
+
+# target to generate assembly for a file
+pcl_visualizer_demo.cpp.s:
+	$(MAKE) -f CMakeFiles/pcl_visualizer_demo.dir/build.make CMakeFiles/pcl_visualizer_demo.dir/pcl_visualizer_demo.cpp.s
+.PHONY : pcl_visualizer_demo.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
+	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... don_segmentation"
-	@echo "... edit_cache"
+	@echo "... pcl_visualizer_demo"
 	@echo "... don_segmentation.o"
 	@echo "... don_segmentation.i"
 	@echo "... don_segmentation.s"
+	@echo "... pcl_visualizer_demo.o"
+	@echo "... pcl_visualizer_demo.i"
+	@echo "... pcl_visualizer_demo.s"
 .PHONY : help
 
 

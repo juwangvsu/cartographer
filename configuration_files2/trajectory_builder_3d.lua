@@ -11,7 +11,7 @@
 -- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
-
+-- scanmatch_mode: 1 original, 2 voxeledge filtered, 3 icp
 MAX_3D_RANGE = 60.
 INTENSITY_THRESHOLD = 40
 
@@ -22,6 +22,11 @@ TRAJECTORY_BUILDER_3D = {
   voxel_filter_size = 0.15,
 
   hgrid_pcd_probthresh = 0.5,
+  voxeledgeratio = 0.4,
+  voxeledgesize = 1.0,
+  scanmatch_mode = 4 ,
+  pcl_viewerflag = 0 ,
+  use_edge_filter = 1,
   high_resolution_adaptive_voxel_filter = {
     max_length = 2.,
     min_num_points = 150,

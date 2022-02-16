@@ -1,0 +1,1 @@
+/media/student/data6/catkin_ws/src/cartographer/readme_cartographer.txt

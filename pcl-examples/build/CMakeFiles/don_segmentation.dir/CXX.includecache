@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/media/student/data6/cartographer/pcl-examples/don_segmentation.cpp
+/home/student/Documents/cartographer/pcl-examples/don_segmentation.cpp
 string
 -
 pcl/point_types.h

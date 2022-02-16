@@ -35,6 +35,9 @@ def displaycloud(cloud, mode='xyzrgb', blocking=False):
       v = True
       while v:
         v = not(visual.WasStopped())
+        #print('waiting')
+        time.sleep(0.1)
+      visual=None
 
 # input PointCloud, not np array
 def show2cloud(cloud1, cloud2, blocking=True):
@@ -72,10 +75,10 @@ def show2cloud_demo(cloudfn="/home/student/Documents/cartographer/test/turtlebot
 if __name__ == "__main__":
     # import cProfile
     # cProfile.run('main()', sort='time')
-    #show2cloud_demo()
+    show2cloud_demo()
     cloudfn1="/home/student/Documents/cartographer/test/turtlebot3_imuodompt2_3/mapdata_37.pcd"
     cloud1 = pcl.load(cloudfn1)
     cloudfn2="/home/student/Documents/cartographer/test/turtlebot3_imuodompt2_3/mapdata_7.pcd"
     cloud2 = pcl.load(cloudfn2)
     show2cloud(cloud1, cloud2)
-    #displaycloud(cloud1)
+    displaycloud(cloud1, blocking=True)

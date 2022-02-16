@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /media/student/data6/cartographer/pcl-examples
+CMAKE_SOURCE_DIR = /home/student/Documents/cartographer/pcl-examples
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /media/student/data6/cartographer/pcl-examples/build
+CMAKE_BINARY_DIR = /home/student/Documents/cartographer/pcl-examples/build
 
 #=============================================================================
 # Target rules for target CMakeFiles/don_segmentation.dir
@@ -66,7 +66,7 @@ CMAKE_BINARY_DIR = /media/student/data6/cartographer/pcl-examples/build
 CMakeFiles/don_segmentation.dir/all:
 	$(MAKE) -f CMakeFiles/don_segmentation.dir/build.make CMakeFiles/don_segmentation.dir/depend
 	$(MAKE) -f CMakeFiles/don_segmentation.dir/build.make CMakeFiles/don_segmentation.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/media/student/data6/cartographer/pcl-examples/build/CMakeFiles --progress-num=1,2 "Built target don_segmentation"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/student/Documents/cartographer/pcl-examples/build/CMakeFiles --progress-num=1,2 "Built target don_segmentation"
 .PHONY : CMakeFiles/don_segmentation.dir/all
 
 # Include target in all.
@@ -76,9 +76,9 @@ all: CMakeFiles/don_segmentation.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/don_segmentation.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /media/student/data6/cartographer/pcl-examples/build/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/student/Documents/cartographer/pcl-examples/build/CMakeFiles 2
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/don_segmentation.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /media/student/data6/cartographer/pcl-examples/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/student/Documents/cartographer/pcl-examples/build/CMakeFiles 0
 .PHONY : CMakeFiles/don_segmentation.dir/rule
 
 # Convenience name for target.
@@ -93,6 +93,43 @@ CMakeFiles/don_segmentation.dir/clean:
 
 # clean rule for target.
 clean: CMakeFiles/don_segmentation.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/pcl_visualizer_demo.dir
+
+# All Build rule for target.
+CMakeFiles/pcl_visualizer_demo.dir/all:
+	$(MAKE) -f CMakeFiles/pcl_visualizer_demo.dir/build.make CMakeFiles/pcl_visualizer_demo.dir/depend
+	$(MAKE) -f CMakeFiles/pcl_visualizer_demo.dir/build.make CMakeFiles/pcl_visualizer_demo.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/student/Documents/cartographer/pcl-examples/build/CMakeFiles --progress-num=3,4 "Built target pcl_visualizer_demo"
+.PHONY : CMakeFiles/pcl_visualizer_demo.dir/all
+
+# Include target in all.
+all: CMakeFiles/pcl_visualizer_demo.dir/all
+
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/pcl_visualizer_demo.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/student/Documents/cartographer/pcl-examples/build/CMakeFiles 2
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/pcl_visualizer_demo.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/student/Documents/cartographer/pcl-examples/build/CMakeFiles 0
+.PHONY : CMakeFiles/pcl_visualizer_demo.dir/rule
+
+# Convenience name for target.
+pcl_visualizer_demo: CMakeFiles/pcl_visualizer_demo.dir/rule
+
+.PHONY : pcl_visualizer_demo
+
+# clean rule for target.
+CMakeFiles/pcl_visualizer_demo.dir/clean:
+	$(MAKE) -f CMakeFiles/pcl_visualizer_demo.dir/build.make CMakeFiles/pcl_visualizer_demo.dir/clean
+.PHONY : CMakeFiles/pcl_visualizer_demo.dir/clean
+
+# clean rule for target.
+clean: CMakeFiles/pcl_visualizer_demo.dir/clean
 
 .PHONY : clean
 

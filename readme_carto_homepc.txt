@@ -1,12 +1,157 @@
+-------2/11/22 imu handling carto -----
+files:
+	pose_extrapolator.cc
+	pose_extrapolator_interface.cc
+	internal/imu_based_pose_extrapolator.cc
+classes:
+	ImuBasedPoseExtrapolator
+	PoseExtrapolator
+
+lua option:
+	use_imu_based = false
+
+imu data handling:
+	PoseGraph3D::AddImuData
+	global_trajectory_builder:AddSensorData
+	*******LocalTrajectoryBuilder3D::AddImuData
+	PoseExtrapolator::AddImuData
+
+TBD:
+checking imu data to determine if the current scan should be discarded. this is based on the observation that when robot stop it pitch up down hard, and cause dramatic scan data difference, such as floor points change. so check x/y axis
+acceleration.
+
+@/home/student/Documents/cartographer/test/scan_hrt_29.pcd, the y-axis estimate is bad. this cause large error in y-velocity, and large y-axis position error in
+the next 1 sec (where no scan data come in to correct the pose info).
+the _29 y-axis seems untractable due to the nature of wall and sensor view field. The only way to avoid 29 is to somehow low weight wall points.
+also the explorator_ limiting the velecity change?
+
+-------2/8/22 icp_match lua add new options for carto -----
+4 steps to use a new option in lua file:
+
+(1) local_trajectory_builder_options_3d.cc:70
+	options.set_voxeledgeratio(parameter_dictionary->GetDouble("voxeledgeratio"));
+(2) mapping/proto/local_trajectory_builder_options_3d.proto
+	float voxeledgeratio= 23;
+	23 is the field id in proto, not actual value
+(3 ) local_trajectory_builder_3d.cc
+	options_.voxeledgeratio()
+(4) trajectory_builder_3d.lua
+	voxeledgeratio = 0.5,
+
+scanmatch_mode: 1 original, 2 voxeledge filtered, 3 icp, 4 ndt
+voxeledgeratio: 0-1.0 if p's neighbors number < voxeledgeratio*max_neighbornumb then keep this point.
+voxeledgesize: neighbor search radius
+pcl_viewerflag: 1 display scanmatching cloud and map, 0 no display
+use_edge_filter: wether or not use edge filter for scan match cloud, for now only valid for icp/ndt mode scan match
+
+icp_match()
+	add icp_example.cc, icp or ndt mode.
+	icp_main2() works, result not very good. ndt better than icp
+	ndt fail to estimate around scan_hrt_20, @ 82.9 sec
+	coincide with odom y-axis angle much higher, floor points
+	throw off ndt. 
+	
+CMakeLists.txt:
+	CXX 14, yaml, -Wno-sign-compare
+-------2/5/22 VoxelFilterEdge to filter the input scan----
+eres_scan_matcher_3d_test.cc
+
+
+----- 1/29/22 add code for scanmatch_log.txt ---
+time, scanfn, init x, y, z, qw, qx, qy, qz
+
+------ 1/28/2022 Eigen Quaternion normalize ------------
+
+Eigen Quaternion if not normalized the quat0.toRotationMatrix() give a bad matrix
+be careful. see test.cc,
+carto code seems normalize the quat.
+
+------ 1/26/2022 b3 scan and submap dump/examination ------------
+
+test/filtered_range_data_in_tracking.pcd-- 8000+ pts --- filtered raw scan (assembled), resolution < 10 cm
+test/scan_hrt%.pcd			-- 254 pts   --- filtered of (1)
+test/unsync_rangedata.pcd 		-- 384 pts   --- raw scan (one of 160 pieces), no save now
+savepcdflag=0;				-- for b3, saving pcd file slow it down a lot after 13 secs.
+					disable it at normal run. at debugging, pause and go rosbag
+					is ok and did not change the outcome.
+data gen steps:
+	~/Documents/cartographer$ 
+	1/2/22 note to use carto 2.0.0
+	roslaunch launch/demo_backpack_3d_nobag.launch cartover:=2.0.0
+	rosbag play b3-2016-02-02-13-32-01.bag --clock
+
+observation:
+	raw scan much large than the one used in scan match, so significant filtering here
+
+	map data quite dense, so map data is build with raw scan, but scan match use filtered
+	scan against map.
+
+	carto very slow after about 20 secs. stock version does not have this problem.
+	scan_hrt_33.pcd y value =-0.10, and going bad, init_ceres y=-0.03
+	scan_hrt_34.pcd y value =-0.25, and going bad, init_ceres y=-0.26
+		this indicate bad imu extrapolation during the period?
+
+TBD: further compare with turtlebot data
+	modify python filter script to check the result of b3 bag after scan filtering. 
+	be aware that b3 bag scan data come in pieces and require assembly in carto node. so
+	if simply time interval filtering might cause lose of some scan data.
+
+------ 1/26/2022 pcl_slideshow.py show pcd in sequence ------------
+pyenv shell 2.7.17
+~/Documents/cartographer$ python pcl_slideshow.py demo2
+
+observation:
+	unfiltered floor points occurs when vehicle stop, probably dip its head
+	so see floor more. 
+	simple floor point filter is done at baglistener_filterpc2.py
+
+------ 1/25/2022 ceres scan match continue testing ------------
+/media/student/data6/catkin_ws/src/cartographer/build
+	component tester code
+/media/student/data6/cartographer
+	main folder to run carto suite.
+test/
+	submap_test_h_xyzi_hiprob%.pcd
+	submap_test_h__xyzi_lowprob%.pcd
+	submap_test_h__xyzi_%.pcd
+	submap_test_h%.pcd   --- this is the map before scan_hrt%.pcd insertion
+	scan_hrt%.pcd
+	scan_hrt.csv	: gt odom data (python code)
+	scanmatch_log.txt: carto node log file
+	scanmatch_log_odom.txt: combined log file (scanmatchlog_combine.py)
+
+test_ceres_pcd/1-25-22/
+	copy of test/*
+test_ceres_pcd/1-25-22/bad/
+	submap/scan snapshot for bad match
+
+observation:
+	last few frame seems have good result, double check with ceres...tester
+	compare it with gt value.
+	the est is pretty good. rotaton good. translation  odom adjust offset
+	bad match:
+		87.5 sec - 90.7 sec: scan_hrt_35.pcd scan_hrt_41.pcd
+	see floor points in scan_hrt_20.pcd ... scan_hrt_30.pcd
+	these floor points get into submap and cause matching problem.
+	
+Video:
+	code modify, build, data run, ceres test:
+	turtlebot3_gazebo_imupt2_carto_3.mp4
+Ref:
+	1/4/2022 note
+
 ------- 1/7/22 test.cc compile_testi2.sh --------------
 test.cc:
 	add some Eigen test code
 ------- 1/7-14/22 carto scanmatch debug ceres --------------
 cartographer/test_ceres_pcd
 	scan_test_h.pcd --- saved at ScanMatch call
-	submap_test_h.pcd --- saved at ScanMatch call
+	test/submap_test_h.pcd --- saved at ScanMatch call
 	readme.txt
 	sweep3.ods  --- costfunc plot of sweeping the init pose 
+	gnuplot splot.p
+	sweep4.csv
+	runplot.sh
 	
 ceres_scan_matcher_3d_test.cc
 	new test code to scanmatch the above two pcd clouds.
@@ -21,6 +166,7 @@ pcl_viewer  -fc 0,0,255 scan_test_h.pcd  -fc 0,255,0 submap_test_h.pcd
 cd /media/student/data6/catkin_ws/src/cartographer/build
 	./cartographer.mapping.internal.3d.scan_matching.ceres_scan_matcher_3d_test
 
+ceres_scan_matcher_3d_test usage
 status: 
 	ceres_scan_matcher_3d_test scanmatch result not as expected.
 		could be resolution and scanmatch setup.
@@ -54,11 +200,12 @@ status:
 		-0.096398 0.111561 -0.0720986 (low+high)
 		-0.174376 -0.0790631 -0.198817 (low resolution)
 		0.403925 0.382077 -1.66027 (high resolution), not even close
-TBD:
+
 	sweep with both x and y and plot: sweep4.ods
 	test with actual high/low resolution data
+	gnuplot splot surface
 	
-------- 1/4/22 carto scan hybrid_grid submap debug --------------
+------- 1/4/22 carto scan hybrid_grid submap data generation debug ----------
 local_trajectory_builder_3d.cc:
 	hybridgrid_2_pcd()
 	scan_2_pcd()
@@ -74,41 +221,89 @@ dump the scan and submap to pcd files for examination:
 
 debug code/files:
   ~/Documents/cartographer/
+	rostopics:
+		/scan_matched_points2   data(3) filtered
+		/camera/depth/points2	data(0) orig resolu
 	sync_rangedata.pcd: data(0) 76800 pts, original resolution
-	submap_test_l.pcd
-	submap_test_h.pcd
+	test/submap_test_l%.pcd
+	test/submap_test_h%.pcd   --- this is the map before scan_hrt%.pcd insertion
+
 		submap hybrid_grid dump, high reso, update each scan 
 		contain both hit and miss points. to exclude miss points
-		hitprobthresh = 0.5, otherwise hitprobthresh=0.1
+		hgrid_pcd_probthresh = 0.5, otherwise =0.1
 		see hybridgrid_2_pcd(), 900 pts, data(3)x3
-	scan_test_l.pcd
+		new option hgrid_pcd_probthresh
+			in conf...files2/trajectory_builder_3d.lua
+	test_ceres_pcd/1-25-22 hgrid_pcd_probthresh = 0.5
+		upto submap_test_h_11.pcd shows two layers
+	test_ceres_pcd/2-1-22 hgrid_pcd_probthresh = 0.1
+		submap_test_h_1.pcd already has 3 layers. two layers are
+		the miss points layer.
+
+	scan_test_l.pcd:	why is this file slightly large than scan_test_h.pcd?
+				1/24/2022, the # of points dep on min_num_points, for some
+				reason its 200 for low_res and 150 in high_res in the lua config
+				max_length of voxel make sense though.
 	scan_test_h.pcd:	current scan dump, called inside ScanMatch()
 				starting from 2nd scan data, data(1)
-	test/scan_hrt_%.pcd:	current scan filtered? in AddAccumulatedRangeData(), data(1), 163 pts
+	test/scan_hrt_%.pcd:	current scan filtered in AddAccumulatedRangeData(), data(1), 163 pts
+				1-7 odom 0s, 8.pcd x-axis 0.08 meter
+	test/scan_hrt.csv:	odom info at the time of scan_hrt_%.pcd, saved by baglistener_filterpc2.py
 	test/filtered_range_data_in_tracking.pcd:
 				data(3), 348 pts
+data generation step:
+	11/29/2021 note "test with carto:"
+	1/1/2021
 
+code building step:
+  (ros pkg)
+	src: /media/student/data6/catkin_ws/src/cartographer/cartographer$ 
+		vi mapping/internal/3d/local_trajectory_builder_3d.cc
+	build: /media/student/data6/catkin_ws
+		catkin_make_isolated --install --use-ninja
+  (carto test)
+	build: /media/student/data6/catkin_ws/src/cartographer/build
+		ninja
+		./cartographer.mapping.internal.3d.scan_matching.ceres_scan_matcher_3d_test
+	
 cloud data processsing/flow:
 	data (3)(2)(1) all very similar. all sparse
-	(0) unsynchronized_data.ranges, 76800 pts. 
+	data(0) unsynchronized_data.ranges, 
+		sync_rangedata.pcd: data(0) 76800 pts, original resolution
+		76800 pts. 
 		passed from ros 
 		PointCloud2 converted to carto::TimedPointCloudData. 
-	(1) high_resolution_point_cloud_in_tracking, 163 pts
-	(2) filtered_range_data_in_local,
-	(3) filtered_range_data_in_tracking, filtered, 348 pts
+	data(1) high_resolution_point_cloud_in_tracking, 163 pts
+	data(1.b) low_resolution_point_cloud_in_tracking, 211 pts
+	data(2) filtered_range_data_in_local,
+	data(3) filtered_range_data_in_tracking, filtered, 348 pts
 	processing: 
-		func (b): data(3) ---adaptive filter voxel --> data(1)
+		data(0) is first filtered from orig resolu to data(3), much sparse.
+		data(0) is /camera/depth/points2
+		data(3) is /scan_matched_points2
+		func (b, f): data(3) ---adaptive filter voxel --> data(1), (1.b)
 		func (b): data(3) ---frame trans  --> data(2) 
 		func (e): data(0) --- voxel filter ---> data(3)
 	LocalTrajectoryBuilder3D::
 	(a) --call--> (e) (b)
-	(b) --call --> (c) (d)
+	(b) --call --> (c) (d) (f)
 
 	(a) AddRangeData(data(0))
 	(b) AddAccumulatedRangeData(data(3))
 	(c) ScanMatch(data(1))
 	(d) InsertIntoSubmap(data(1,2,3))
-	(e) VoxelFilter()
+		(d.1) active_submaps.InsertData()
+		when insert scan data to submap, it is not really "adding" the data directly.
+		it actually update the value at the correspoinding grid points for high_res and i
+		low_res hybrid_grid. so the same range data is used for both high and low res hgrid,
+		not the high_res and low_res filtered data.
+		(d.2) InsertionResult()
+		it also update the graph, which point to the scan data.
+ 
+	(e) VoxelFilter(), voxel_filter_size, 0.15, voxel is like a cubic cell
+	(f) AdaptiveVoxelFilter, use max_length , min_num_points to filter
+		high_resolution_adaptive_voxel_filter_options
+		low_resolution_adaptive_voxel_filter_options
 
 options:
 	map_builder.lua
@@ -166,9 +361,11 @@ see 11/12/2021 cartographer bag study, submap
 python code to control which pc2 frame go through.
 skipcnt: param, how many pc2 to skip
 	turtlebot3 bag file 60hz for pc2 
-roslaunch launch/turtlebot3_3d.launch cartover:=2.0.0
-rosparam set skipcnt 10; python baglistener_filterpc2.py
-rosbag play turtlebot3_imuodompt2_3.bag --topics /imu /camera/depth/points /odom /camera/depth/points:=/tmppt2 /imu:=/mavros/imu/data /odom:=/odom_gt --clock
+
+test step:
+	roslaunch launch/turtlebot3_3d.launch cartover:=2.0.0
+	pyenv shell 2.7.17; rosparam set skipcnt 20; python baglistener_filterpc2.py
+	rosbag play turtlebot3_imuodompt2_3.bag --topics /imu /camera/depth/points /odom /camera/depth/points:=/tmppt2 /imu:=/mavros/imu/data /odom:=/odom_gt --clock
 
 filter:
 	baglistener_filterpc2.py  --- repub pt2 topic after filter
@@ -180,6 +377,12 @@ build from source version 2.0.0
 
 	rosversion cartographer
 
+to use the nonstock carto version:
+	export ROS_PACKAGE_PATH=
+	source /media/student/data6/catkin_ws/devel_isolated/setup.bash
+	then launch as:
+		roslaunch launch/demo_backpack_3d_nobag.launch cartover:=2.0.0
+
 fix: launch file check carto version.
 ------- 12/29/21 ceres-solve --------------
 homepc:Documents/ceres-solver
@@ -189,6 +392,15 @@ Test:
 	cd ceres-bin/bin; ./hellowworld
 
 test Jet class
+
+----- 12/29/21 pcl python code -------------------
+verifypose.py
+	curr fold must contain yaml and pcd files
+	convert pcd file based on pose info in yaml
+visualization.py
+	show pcd file like pcl_viewer
+pcl_slideshow.py
+	slide show of pcd files in the folder, in progress
 
 ------- 12/21/21 verify pose info / apply to pcd files --------------
 script:
@@ -304,6 +516,8 @@ TBD:
 	~/Documents/hdl_graph_slam/ndt/build/icp_example -pst=1 -if=mapdata_3.pcd -tf=mapdata_4.pcd -yawg=0.1 -xg=0 -rsl=0.02 -md=gicp -ms=-1
 		-tf: target frame, -if: reference frame, i
 		result translation is to move tf to if
+	~/Documents/hdl_graph_slam/ndt/build/icp_example -pst=1 -rsl=0.02 -md=ndt -ms=-2
+		ms -2: read both pcd file names and init pose from testcfg.yaml
 
 	turtlebot3_pcd$ ~/Document/hdl_graph_slam/ndt/build/icp_example -pst=1 -if=mapdata_32.pcd -tf=mapdata_46.pcd -yawg=0.1 -xg=0 -rsl=0.02 -md=gicp -ms=-1
 
@@ -400,7 +614,7 @@ python code to control which pc2 frame go through.
 skipcnt: param, how many pc2 to skip
 	turtlebot3 bag file 60hz for pc2 
 roslaunch launch/turtlebot3_3d.launch cartover:=2.0.0
-osparam set skipcnt 10; python baglistener_filterpc2.py
+osparam set skipcnt 20; python baglistener_filterpc2.py
 rosbag play turtlebot3_imuodompt2_3.bag --topics /imu /camera/depth/points /odom /camera/depth/points:=/tmppt2 /imu:=/mavros/imu/data /odom:=/odom_gt --clock
 
 ----------12/9/21 turtlebot3 carto imu_link update ---
@@ -616,7 +830,11 @@ test with carto:
 	roslaunch launch/turtlebot3_3d.launch
 	roslaunch launch/turtlebot3_3d.launch cartover:=2.0.0
 		if run non stock version of carto
+		to use nostock version, see 1/2/22 
+	(1/2/22 optional) rosparam set skipcnt 20; python baglistener_filterpc2.py
+
 	rosbag play turtlebot3_imuodompt2_3.bag --topics /imu /camera/depth/points /camera/depth/points:=/camera/depth/points2 /imu:=/mavros/imu/data --clock
+
 	carto node work, result no good. pt2 seems at z-axis, rotate needed? 
 	fixed:	create corresponding urdf for simplified turtlebot
 		turtlebot3_3d.urdf camera_depth_optical_frame_joint
