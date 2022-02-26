@@ -1,3 +1,44 @@
+—------- 2/25/22 matlab code to extract pc edges ------------------
+goal:
+	icp match result might improve when only edge points are used.
+	about 87.17 sec, scan_hrt_37.pcd vs submap_test_h_36.pcd
+
+added to cartographer repo
+	works at pc and linux,
+	  input: test/turtlebot3_imuodompt2_3/map*.pcd
+	  output:			edge_fastpcd_0.1/map*.pcd
+	matlab/Point-clou.../xyz2depth.m
+			edge_extrac_neighbor_search_pcd_fast.m
+
+—------- 2/22/22 icp_example new mode ------------------
+	ms -2: read both pcd file names and init pose from testcfg.yaml
+		
+	~/Documents/hdl_graph_slam/ndt/build/icp_example -pst=1 -rsl=0.02 -md=ndt -ms=-2
+	~/Documents/cartographer/test_ceres_pcd$ ls testcfg.yaml
+
+—------- 2/21/22 map_builder.cc—------------------
+pose_graph_ :   PoseGraph3D
+Trajectory_builders_:  CreateGlobalTrajectoryBuilder3D LocalTrajectoryBuilder3D
+?The submap in local traj builder moved/copied to pose_graph_, which is visualized ?
+
+87.17 sec. rvis show trajectory y-axis change, this is  extrapolator.ExtrapolatePose(now) in ros space node.cc. this is not the result of the cartographer's
+extrapolator. 
+
+both carto and carto_ros maintain imu extrapolate.
+
+the cartographer code did not keep the extrapolate in the pose_graph.
+the rviz plot come from data from Node::PublishLocalTrajectoryData()
+
+the imu data is not immediately processed in carto code. it is delayed to be processed when a new pointcloud data come in. this is the doing of the CollatedTrajectoryBuilder
+
+the imu data saved up in carto is used to extrapolate the init pose for scan match?
+
+-------2/17/22 add use_relative_pose carto mode-----
+
+debugging: 
+	icp_match() scan_point_cloud_prev scan_point_cloud
+	icp_main2() if both input clouds point to the same cloud ok?
+
 -------2/11/22 imu handling carto -----
 files:
 	pose_extrapolator.cc
@@ -38,12 +79,26 @@ also the explorator_ limiting the velecity change?
 (4) trajectory_builder_3d.lua
 	voxeledgeratio = 0.5,
 
-scanmatch_mode: 1 original, 2 voxeledge filtered, 3 icp, 4 ndt
-voxeledgeratio: 0-1.0 if p's neighbors number < voxeledgeratio*max_neighbornumb then keep this point.
-voxeledgesize: neighbor search radius
-pcl_viewerflag: 1 display scanmatching cloud and map, 0 no display
-use_edge_filter: wether or not use edge filter for scan match cloud, for now only valid for icp/ndt mode scan match
+new options:
+scanmatch_mode: 1 original ceres sm, 3 icp 4 ndt, mode 2 now handle by 
+    use_edge_filter option
+voxeledgeratio: 
+	0-1.0 if p's neighbors number < voxeledgeratio*max_neighbornumb then keep this point.
+voxeledgesize: 
+	neighbor search radius
+pcl_viewerflag: 
+	1 display scanmatching cloud and map, 0 no display
+use_edge_filter: 
+	wether or not use edge filter for scan match cloud, for now only valid for icp/ndt mode scan match
+use_relative_pose:
+	match scan with previous scan and calculate the pose from relative pose
+	this should be impl for all scanmatch_mode
 
+main interface: 
+	must return the pose_estimate.
+	ScanMatch()
+	ScanMatch_icp()
+	
 icp_match()
 	add icp_example.cc, icp or ndt mode.
 	icp_main2() works, result not very good. ndt better than icp
@@ -102,7 +157,7 @@ pyenv shell 2.7.17
 
 observation:
 	unfiltered floor points occurs when vehicle stop, probably dip its head
-	so see floor more. 
+	so see floor more. mapdata_21.pcd, at 82.9 sec
 	simple floor point filter is done at baglistener_filterpc2.py
 
 ------ 1/25/2022 ceres scan match continue testing ------------
@@ -441,6 +496,10 @@ lenova2:
 from turtlebot3_imuodompt2_3.bag bag file
 results:
 	.pcd; yaml; .ply
+	raw ply or pcd  data is w.r.t the camera sensor frame. y-axis top to bottom, z-axis point into the screen. x-axis left to right
+	at mapdata_21.pcd, y-axis dip due to robot stop.
+	pcl_viewer mapdata_22.pcd mapdata_21.pcd -use_point_picking
+
 
   take pc2 and odom data, synced
         (1) cd test/turtlebot3_imuodompt2_3; rosrun hdl_graph_slam savecloud
@@ -500,6 +559,7 @@ TBD:
         to use only point cloud. else it will save odom too.
       cd test; rosrun hdl_graph_slam savecloud
       rosbag play mavrosshort_transrecord.bag --topics /mavros/imu/data /camera/depth/points2  /camera/depth/points2:=/filtered_points
+      or rosbag play turtlebot3_imuodompt2_3.bag /camera/depth/points:=/filtered_points --clock
            saved pcd: mapdata_3,4….pcd
            view pcd: pcl_view mapdata_3.pcd
 
@@ -639,11 +699,13 @@ ref:
 	11/29/21 note 
 
 ---------- turtlebot3_imuodompt2_3.bag imu odom examination --------
-movement pattern:
+movement pattern observation:
 	xy_odom plot: start time 75.5 sec,
 	move forward (x-axis), rot 45 deg, move forward
 	turtle only capable of x_body move, no y_axis movement
-	start move at 77.4 sec ( x-acc +), stop at 82.8800 sec (x-acc -)
+	start move at 77.4 sec ( x-acc +), 
+	stop at 82.8800 sec (x-acc -), robot body dip, point cloud dip y-axis
+		mapdata_21.pcd
 	rot, move again at 92.2 sec, stop at 97.7 sec, notice 
 	(x-acc_body >x-acc_odom) due to orientation change
 	meanwhile y-acc_body < y-acc_odom 

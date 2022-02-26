@@ -11,7 +11,8 @@
 -- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
--- scanmatch_mode: 1 original, 2 voxeledge filtered, 3 icp
+--   scanmatch_mode: 1 original ceres sm, 3 icp 4 ndt, mode 2 now handle by
+--    use_edge_filter option
 MAX_3D_RANGE = 60.
 INTENSITY_THRESHOLD = 40
 
@@ -21,12 +22,16 @@ TRAJECTORY_BUILDER_3D = {
   num_accumulated_range_data = 1,
   voxel_filter_size = 0.15,
 
+  --- new options jwang
   hgrid_pcd_probthresh = 0.5,
   voxeledgeratio = 0.4,
   voxeledgesize = 1.0,
   scanmatch_mode = 4 ,
   pcl_viewerflag = 0 ,
-  use_edge_filter = 1,
+  use_edge_filter = 0,
+  use_relative_pose = 0,
+  --- new options jwang
+  
   high_resolution_adaptive_voxel_filter = {
     max_length = 2.,
     min_num_points = 150,
