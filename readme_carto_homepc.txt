@@ -1,3 +1,10 @@
+--------sticky --------------------------------------
+
+build carto_ros:
+	/media/student/data6/catkin_ws$ catkin_make_isolated --install --use-ninja
+ref:
+	"readme pointcloud ndt icp slam cartographer code "
+
 —------- 2/25/22 matlab code to extract pc edges ------------------
 goal:
 	icp match result might improve when only edge points are used.
@@ -10,11 +17,16 @@ added to cartographer repo
 	matlab/Point-clou.../xyz2depth.m
 			edge_extrac_neighbor_search_pcd_fast.m
 
+
 —------- 2/22/22 icp_example new mode ------------------
 	ms -2: read both pcd file names and init pose from testcfg.yaml
 		
 	~/Documents/hdl_graph_slam/ndt/build/icp_example -pst=1 -rsl=0.02 -md=ndt -ms=-2
 	~/Documents/cartographer/test_ceres_pcd$ ls testcfg.yaml
+		link to a case yaml
+TBD:
+	add code to remove floor points.
+	test bad matching case 29.
 
 —------- 2/21/22 map_builder.cc—------------------
 pose_graph_ :   PoseGraph3D
@@ -57,9 +69,18 @@ imu data handling:
 	*******LocalTrajectoryBuilder3D::AddImuData
 	PoseExtrapolator::AddImuData
 
-TBD:
+skipping high imu:
+some scan_hrt_## might be skipped for saving, be aware of seq number.
 checking imu data to determine if the current scan should be discarded. this is based on the observation that when robot stop it pitch up down hard, and cause dramatic scan data difference, such as floor points change. so check x/y axis
 acceleration.
+
+bad matching:
+	scan_hrt_29.pcd  
+	submap_test_h_28.pcd
+	init: 1.09538 -0.220299 0.401103
+	result: 1.03242, -0.811939, 0.39166
+		q: [0.962838, -0.0313053, 0.0293501, 0.266647] 
+	y-axis should be 0.
 
 @/home/student/Documents/cartographer/test/scan_hrt_29.pcd, the y-axis estimate is bad. this cause large error in y-velocity, and large y-axis position error in
 the next 1 sec (where no scan data come in to correct the pose info).
@@ -154,6 +175,10 @@ TBD: further compare with turtlebot data
 ------ 1/26/2022 pcl_slideshow.py show pcd in sequence ------------
 pyenv shell 2.7.17
 ~/Documents/cartographer$ python pcl_slideshow.py demo2
+usage: python pcl_slideshow.py demo1|demo2|demo3 [fnprefix]
+# run under ~/Docments/cartographer, pyenv shell 2.7.
+# demo1: show all scan*pcd, demo2 show all submap*.pcd
+# demo3: show all pcd file with exact name as prefix_###.pcd
 
 observation:
 	unfiltered floor points occurs when vehicle stop, probably dip its head
@@ -455,7 +480,7 @@ verifypose.py
 visualization.py
 	show pcd file like pcl_viewer
 pcl_slideshow.py
-	slide show of pcd files in the folder, in progress
+	slide show of pcd files in the folder
 
 ------- 12/21/21 verify pose info / apply to pcd files --------------
 script:

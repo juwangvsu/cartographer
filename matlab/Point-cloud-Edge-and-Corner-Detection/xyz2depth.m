@@ -53,11 +53,17 @@ for i=1:length(plyfilelist)
    filen = inputfolder+plyfilelist(i,1).name
    outputfn = outputfolder+plyfilelist(i,1).name
    outputfn2 = outputfolder+plyfilelist(i,1).name+".ply"
+   outputfn3 = outputfolder+plyfilelist(i,1).name+"_edge.pcd"
+   outputfn4 = outputfolder+plyfilelist(i,1).name+"_edge.ply"
    %ptCloud = pcread(filen)
    %edge_cloud = edge_extrac(filen, 1,edgeradius)
    edge_cloud = edge_extrac_neighbor_search_pcd_fast(filen,1,edgeradius);
+   rem_cloud = floor_detection(edge_cloud, false)
    pcwrite(edge_cloud, outputfn)
    pcwrite(edge_cloud, outputfn2)
+   pcwrite(rem_cloud, outputfn3)
+   pcwrite(rem_cloud, outputfn4)
+
 end
 toc
 

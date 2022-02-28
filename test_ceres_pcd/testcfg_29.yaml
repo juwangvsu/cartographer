@@ -1,0 +1,34 @@
+pose:
+  nop: 1
+  ---pcdfn2: /home/student/Documents/cartographer/test/turtlebot3_imuodompt2_3/mapdata_28.pcd
+  ---pcdfn2: /home/student/Documents/cartographer/test/turtlebot3_imuodompt2_3/edge_fastpcd_0.1/mapdata_28.pcd_edge.pcd
+  pcdfn2: /home/student/Documents/cartographer/test_ceres_pcd/2-27-ndt/scan_hrt_29.pcd
+  pcdfn1: /home/student/Documents/cartographer/test_ceres_pcd/2-27-ndt/submap_test_h_28.pcd
+  ---pcdfn1: /home/student/Documents/cartographer/test/submap_test_h_27.pcd
+  ---pcdfn1: /home/student/Documents/cartographer/test/turtlebot3_imuodompt2_3/edge_fastpcd_0.1/mapdata_27.pcd_edge.pcd
+  ---pcdfn1: /home/student/Documents/cartographer/test/turtlebot3_imuodompt2_3/mapdata_27.pcd
+
+  position:
+    y: -0.245228058376376
+    z: 0.3001009501646021193
+    x: 1.10232988649202
+  orientation:
+    x: -0.0007075276025025124
+    y: 0.00151124278112523323
+    z: 0.00200544662666
+    w: 0.99638
+  gtposition:
+    y: -0.00245228058376376
+    z: 0.001009501646021193
+    x: 1.10232988649202
+  gtorientation:
+    x: -0.0007075276025025124
+    y: 0.00151124278112523323
+    z: 0.2544662666
+    w: 0.9638
+header:
+  frame_id: odom
+  stamp:
+    sec: 94
+    nsec: 767000000
+  seq: 2842

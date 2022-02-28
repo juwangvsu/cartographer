@@ -1,6 +1,8 @@
 #!/usr/bin/env python
-# usage: python verifypose.py [gen|demo1|demo2|demo3]
-# generate transformed cloud and viewing
+#  usage: python pcl_slideshow.py demo1|demo2|demo3 [fnprefix]
+# run under ~/Docments/cartographer, pyenv shell 2.7.17
+# demo1: show all scan*pcd, demo2 show all submap*.pcd
+# demo3: show all pcd file with exact name as prefix_###.pcd
 # copyright Ju Wang
 import yaml
 import numpy
@@ -19,6 +21,7 @@ import glob
 import pcl
 import visualization
 import time
+import re
 pcdfilelist = glob.glob("test/submap_test_h*.pcd")  # submap point cloud in local frame
 pcdfilelist2 = glob.glob("test/scan_hrt*.pcd")  # scan point cloud in cam frame
 pcdfilelist_bodyrel = glob.glob("rel-body-map*.pcd") # point cloud in body frame
@@ -62,7 +65,6 @@ def sortfilelist(flist):
     if len(flist)==0:
         return None
     fn=flist[0]
-
     fnprelist = fn.split('.')[0].split('_')[0:-1]
     zz=''
     for qq in fnprelist:
@@ -70,7 +72,6 @@ def sortfilelist(flist):
             zz=qq
         else:
             zz=zz+'_'+qq
-
     fnprefix = zz
     #fnprefix = fn.split('.')[0].split('_')[0]
     fnpostfix=fn.split('.')[1]
@@ -218,6 +219,49 @@ def pose_pcd_world(yamlfilelist,pcdfilelist):
   for i in range(1,len(pcdfilelist)):
       pcd_worldframe(yamlfilelist[i], pcdfilelist[i])
 
+def filter_prefix(fnprefix, flist):
+    newflist=[]
+    for i in range(1, len(flist)):
+        #m=re.match('^test/scan_hrt_voxeledge_[0-9]*.pcd', pcdfilelist3[0])
+        #print(fnprefix)
+        patt= fnprefix+'[0-9]*.pcd'
+        #print('reg ex pattern: ', patt)
+        m=re.match(patt, flist[i])
+        if m:
+            print(flist[i])
+            newflist.append(flist[i])
+    return newflist
+
+def pcdfl_filtered(fnprefix):
+      print('prefix: ', fnprefix)
+      pcdfilelist3 = glob.glob(fnprefix+"*.pcd")
+      pcdfl3_filtered = filter_prefix(fnprefix, pcdfilelist3)
+      pcdfl3_filtered = sortfilelist(pcdfl3_filtered)
+      return pcdfl3_filtered
+
+def loopfunc(pcdfl3_filtered, pcdfl4_filtered=None):
+      i=0;
+      while True:
+      #for i in range(len(pcdfl3_filtered)):
+        key=raw_input('enter a key: ')
+        print(key)
+        if key=='q':
+            break
+        if key=='a':
+            i = i-1
+            i = max(i,0)
+        if key=='f' or key=='':
+            i=i+1
+            i=min(i,len(pcdfl3_filtered)-1)
+        cloud1 = pcl.load(pcdfl3_filtered[i])
+        print(i, pcdfl3_filtered[i])
+        if pcdfl4_filtered==None:
+            visualization.displaycloud(cloud1,pcdfl3_filtered[i], 'xyz')
+        else:
+            cloud2 = pcl.load(pcdfl4_filtered[i])
+            print(i, pcdfl4_filtered[i])
+            visualization.show2cloud(cloud1, cloud2, False)
+
 if __name__ == "__main__":
 
   #print(pcdfilelist)
@@ -230,15 +274,34 @@ if __name__ == "__main__":
   if arglen>1:
       cmd = sys.argv[1]
   print("limited func from pcl-python visualization ...")
+  print(" usage: python pcl_slideshow.py demo1|demo2|demo3 [fnprefix]")
+  print(" demo3: show all pcd file with exact name as prefix_###.pcd")
+  print(" run under ~/Docments/cartographer, pyenv shell 2.7.17")
   if cmd=="demo1":
       print("demo1, show submap clouds")
       for i in range(len(pcdfilelist)):
         cloud2 = pcl.load(pcdfilelist[i])
-        visualization.displaycloud(cloud2,'xyz')
+        print(pcdfilelist[i])
+        visualization.displaycloud(cloud2,pcdfilelist[i],'xyz')
         time.sleep(1)
   if cmd=="demo2":
       print("demo2, show scan_hrt% clouds")
       for i in range(len(pcdfilelist2)):
         cloud2 = pcl.load(pcdfilelist2[i])
-        visualization.displaycloud(cloud2,'xyz')
+        print(i, pcdfilelist2[i])
+        visualization.displaycloud(cloud2,pcdfilelist2[i], 'xyz')
         time.sleep(1)
+  if cmd=="demo3":
+      print("demo3, show clouds with exact file prefix")
+      fnprefix = sys.argv[2]
+      pcdfl3_filtered = pcdfl_filtered(fnprefix)
+      loopfunc(pcdfl3_filtered, None)
+      #visualization.show2cloud(cloud1, cloud2, False)
+      #time.sleep(1)
+  if cmd=="demo4":
+      print("demo4, show two seq of clouds with two file prefix")
+      fnprefix1 = sys.argv[2]
+      fnprefix2 = sys.argv[3]
+      pcdfl3_filtered = pcdfl_filtered(fnprefix1)
+      pcdfl4_filtered = pcdfl_filtered(fnprefix2)
+      loopfunc(pcdfl3_filtered, pcdfl4_filtered)

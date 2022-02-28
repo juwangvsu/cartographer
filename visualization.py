@@ -16,7 +16,7 @@ def filter_nan(cloud):
     return cloud_np_valid
 
 # input cloud could be two type: xyz, or xyzrgb, different show methods.
-def displaycloud(cloud, mode='xyzrgb', blocking=False):
+def displaycloud(cloud, title, mode='xyzrgb', blocking=False):
     global visual
     if visual == None:
         visual = pcl.pcl_visualization.CloudViewing()
@@ -49,7 +49,7 @@ def show2cloud(cloud1, cloud2, blocking=True):
     pc2 = pcl._pcl.PointCloud_PointXYZRGB()
     twocloud_np = np.concatenate((cloud_xyzrgb_np1, cloud_xyzrgb_np2), axis=0)
     pc2.from_array(twocloud_np)
-    displaycloud(pc2, blocking=blocking)
+    displaycloud(pc2, '2 cloud', 'xyzrgb', blocking=blocking)
 
 
 def show2cloud_demo(cloudfn="/home/student/Documents/cartographer/test/turtlebot3_imuodompt2_3/mapdata_37.pcd"):

@@ -24,28 +24,46 @@ fig_edge = figure;
 fig_edge2 = figure;
 tic
 %edge_extrac("C:\Users\Ju Wang\Documents\turtlebot3_imuodompt2_3\mapdata_9_.ply",1,0.1);
-edge_extrac_neighbor_search_pcd_fast("C:\Users\Ju Wang\Documents\turtlebot3_imuodompt2_3\mapdata_9.pcd",1,0.1);
-%edge_extrac_neighbor_search_pcdt("C:\Users\Ju Wang\Documents\turtlebot3_imuodompt2_3\mapdata_9.pcd",1,0.1);
+
+%edge_extrac_neighbor_search_pcd_fast("C:\Users\Ju Wang\Documents\turtlebot3_imuodompt2_3\mapdata_9.pcd",1,0.1);
+% 2.34 secs
+
+%edge_extrac_neighbor_search_pcd("C:\Users\Ju Wang\Documents\turtlebot3_imuodompt2_3\mapdata_9.pcd",1,0.1);
+% 1000 secs
+
 %edge_extrac_neighbor_search("C:\Users\Ju Wang\Documents\turtlebot3_imuodompt2_3\mapdata_9.pcd",1,0.1);
 toc
 
 %pause
 
 % processing ply files in a folder 
-inputfolder = "C:\Users\Ju Wang\Documents\turtlebot3_imuodompt2_3\";
-outputfolder = "C:\Users\Ju Wang\Documents\turtlebot3_imuodompt2_3\edge_fastpcd_0.1\"
+if ispc
+    inputfolder = "C:\Users\Ju Wang\Documents\turtlebot3_imuodompt2_3\";
+    outputfolder = "C:\Users\Ju Wang\Documents\turtlebot3_imuodompt2_3\edge_fastpcd_0.1\"
+elseif isunix
+    inputfolder = "/home/student/Documents/cartographer/test/turtlebot3_imuodompt2_3/";
+    outputfolder = "/home/student/Documents/cartographer/test/turtlebot3_imuodompt2_3/edge_fastpcd_0.1/"
+end
+mkdir(outputfolder)
 filename_prefix="mapdata_*.pcd"
 %filename_prefix="mapdata_*.ply"
 plyfilelist = dir(inputfolder+filename_prefix)
+tic
 for i=1:length(plyfilelist)
    filen = inputfolder+plyfilelist(i,1).name
    outputfn = outputfolder+plyfilelist(i,1).name
+   outputfn2 = outputfolder+plyfilelist(i,1).name+".ply"
    %ptCloud = pcread(filen)
    %edge_cloud = edge_extrac(filen, 1,edgeradius)
-   edge_extrac_neighbor_search_pcd_fast(filen,1,edgeradius);
+   edge_cloud = edge_extrac_neighbor_search_pcd_fast(filen,1,edgeradius);
+   rem_cloud = floor_detection(edge_cloud, false)
    pcwrite(edge_cloud, outputfn)
-end
+   pcwrite(edge_cloud, outputfn2)
+   pcwrite(rem_cloud, outputfn3)
+   pcwrite(rem_cloud, outputfn4)
 
+end
+toc
 
 %[edge_points,edge_id,curve,surface_normal,cloud] = edgedetection(X)
 %edge_cloud = pointCloud(edge_points);
