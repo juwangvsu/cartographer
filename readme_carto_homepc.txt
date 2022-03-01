@@ -492,9 +492,11 @@ Pcl_viewer to view two clouds
 Pcl_viewer  -fc 0,0,255 mapdata_6.pcd  -fc 0,255,0 test.pcd
 
 --------------12/20/21 python-pcl build-------------------------
-homepc
+homepc, lenova1 (2/28/22)
 python binding of pcl library. not upto date maintained.
-prebuild pkg is for pcl1.7, build from source have link problem
+prebuild pkg is for pcl1.7, system has pcl1.8
+	pkg-config --list-all|grep pcl
+build from source have link problem
 workaround by change setup.py
 build/install for 2 pyenv: 2.7.17 and miniconda
 
@@ -506,10 +508,11 @@ Build step:
 	cd python-pcl
 	modifiy setup.py
 		cp ~/Documents/miscfiles/python-pcl/setup.py .
+			https://github.com/juwangvsu/miscfiles.git
 	python setup.py install
 		this will compile and install @ current python env.
 		2.7 env might error when install filelock pkg. seems safe
-		to ignore.
+		to ignore, rerun pyenv shell 2.7.17
 ref:
 	"readme pointcloud ndt icp slam cartographer code "
 	2.7 pyenv also add some rospy pkgs: pyyaml rospkg rospy
