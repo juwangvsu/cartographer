@@ -27,6 +27,8 @@ TRAJECTORY_BUILDER_3D = {
   voxeledgeratio = 0.4,
   voxeledgesize = 1.0,
   scanmatch_mode = 4 ,
+  savepcdflag = 1,
+--   scanmatch_mode: 1 original ceres sm, 3 icp 4 ndt, mode 2 now handle by
   pcl_viewerflag = 0 ,
   use_edge_filter = 0,
   use_relative_pose = 0,

@@ -4,6 +4,71 @@ build carto_ros:
 	/media/student/data6/catkin_ws$ catkin_make_isolated --install --use-ninja
 ref:
 	"readme pointcloud ndt icp slam cartographer code "
+	readme_carto_debug.txt
+	readme_carto_rosbuild.txt
+	readme_cartographer.txt
+	readme_airsim.txt
+carto 2.0.0:
+        export ROS_PACKAGE_PATH=
+        source /media/student/data6/catkin_ws/devel_isolated/setup.bash
+
+---------4/15/22 debug mavros bag dataset ------------------
+test:
+	lua: mode=4 (ndt), savepcdflag=1
+	cd ~/Documents/cartographer/
+	roslaunch launch/p3at_3d_90deg.launch cartover:=2.0.0
+	rosbag play mavrosshort_transrecord_2.bag --clock
+	rosservice call /trajectory_query "trajectory_id: 0" > test/traj_0.txt
+	
+test data:
+	cp ../test/* test_ceres_pcd/3-15-22-mavrosshort/
+		traj_0.0.txt
+		scanmatch_log.txt
+		
+status:
+	match bad around:
+	scanmatch_log.txt: line 10: 
+		scan_hrt_8.pcd, -3.344, -0.239725, -0.0666702,
+				-2.69143, 0.266681, 0.0305569
+	the init x,y,z is not necessary the previous scan match pose,
+	an expolation seems contribute to this. check imu data
+
+	further evidence:
+	according to traj_0.0.txt
+	we have a jump at 
+	       secs: 1636502968
+	       nsecs: 209133900
+	 from
+	 x: -0.085 y: 0.0  z: 0.08 
+	 to
+	 x: -2.69 y: 0.26  z: 0.03
+	scan_hrt_7.pcd, scan_hrt_8.pcd,
+	checking the carto output. the init pose at scan_hrt_8.pcd is wrong, it is suppose to be close to the last traj estimation. further debug.
+	see readme_carto_debug.txt
+
+
+
+----------3/14/22 b3 bag file pt2 frame filter -------------
+baglistener_filterpc2_b3.py
+	similar to baglistener_filterpc2.py
+	see 1/1/22 note
+—------- 3/2/22 turtlebot3_imuodompt2_4.bag wide horizontal_fov ------------------
+	2.6878, about 155 deg
+	320x120, 20hz
+	ndt result very good
+
+--------3/1/2022 wangtest_main.cc ---------
+this is a replic of icp_example.cc but build in cartograph space
+run a scan match methods on testing pcd files. 
+	mode: icp, ceres, ndt
+build:
+	cartograph build (standalone or via ros catkin)
+run:
+	catkin_ws/src/cartographer/build$ ./cartographer_wangtest 
+input:
+	testcfg.yaml
+src:
+	catkin_ws/src/cartographer/cartographer/io/
 
 —------- 2/25/22 matlab code to extract pc edges ------------------
 goal:
@@ -114,6 +179,8 @@ use_edge_filter:
 use_relative_pose:
 	match scan with previous scan and calculate the pose from relative pose
 	this should be impl for all scanmatch_mode
+savepcdflag:
+	1 to save pcd files, 0 no save. if 1, carto slow down to crawl for b3 dataset.
 
 main interface: 
 	must return the pose_estimate.
@@ -134,7 +201,12 @@ eres_scan_matcher_3d_test.cc
 
 
 ----- 1/29/22 add code for scanmatch_log.txt ---
-time, scanfn, init x, y, z, qw, qx, qy, qz
+time, scanfn, init x, y, z, qw, qx, qy, qz, estimated x,y,z, qw, qx, qy, qz
+	the init x,y,z is not necessary the previous scan match pose,
+	an expolation also contribute.	
+traj_0.0.txt:
+	each traj pose is almost the scan match estimated pose.
+	so a new pose after each lidar data (or scan match call)
 
 ------ 1/28/2022 Eigen Quaternion normalize ------------
 
@@ -147,9 +219,10 @@ carto code seems normalize the quat.
 test/filtered_range_data_in_tracking.pcd-- 8000+ pts --- filtered raw scan (assembled), resolution < 10 cm
 test/scan_hrt%.pcd			-- 254 pts   --- filtered of (1)
 test/unsync_rangedata.pcd 		-- 384 pts   --- raw scan (one of 160 pieces), no save now
-savepcdflag=0;				-- for b3, saving pcd file slow it down a lot after 13 secs.
+savepcdflag=0;				-- now lua option. for b3, saving pcd file slow it down a lot after 13 secs.
 					disable it at normal run. at debugging, pause and go rosbag
 					is ok and did not change the outcome.
+test:
 data gen steps:
 	~/Documents/cartographer$ 
 	1/2/22 note to use carto 2.0.0
@@ -204,6 +277,8 @@ test_ceres_pcd/1-25-22/
 	copy of test/*
 test_ceres_pcd/1-25-22/bad/
 	submap/scan snapshot for bad match
+test_ceres_pcd/3-8-22-turtlebot3_imuodompt2_4
+test_ceres_pcd/3-15-22-mavrosshort
 
 observation:
 	last few frame seems have good result, double check with ceres...tester
@@ -231,6 +306,7 @@ cartographer/test_ceres_pcd
 	sweep3.ods  --- costfunc plot of sweeping the init pose 
 	gnuplot splot.p
 	sweep4.csv
+	sweep4.png
 	runplot.sh
 	
 ceres_scan_matcher_3d_test.cc
@@ -448,7 +524,8 @@ test step:
 	rosbag play turtlebot3_imuodompt2_3.bag --topics /imu /camera/depth/points /odom /camera/depth/points:=/tmppt2 /imu:=/mavros/imu/data /odom:=/odom_gt --clock
 
 filter:
-	baglistener_filterpc2.py  --- repub pt2 topic after filter
+	baglistener_filterpc2.py  --- repub pt2 topic after filter turtlebot bag files
+	baglistener_filterpc2_b3.py  --- repub pt2 topic after filter for b3 bagfiles
 
 ------- 1/2/22 carto stock version 1.0.0 vs build 2.0.0 --------------
 build from source version 2.0.0
@@ -780,6 +857,7 @@ p3at_3d.urdf
         p3at_3d.launch
 turtlebot3_3d.urdf
         bag: turtlebot3_imuodompt2_3.bag
+             turtlebot3_imuodompt2_4.bag
         simplified with 3d lidar
         turtlebot3_3d.launch (carto)
 	turtlebot3_slam/launch/turtlebot3_bringup_tf_simpleurdf.launch (view)
@@ -787,13 +865,17 @@ turtlebot3_simple.urdf
         simplified with 2d lidar
         turtlebot3_2d.launch
 
+bagfile info:
+        turtlebot3_imuodompt2_3.bag	horizontal_fov 1.3439, 320x240 30hz
+        turtlebot3_imuodompt2_4.bag	horizontal_fov 2.6878, 320x120 20hz
+
 ----12/5/21 mavrosshort_.bag carto test ---
 mavrosshort_transrecord.bag
 see 11/26/21 note
 
 	imu_link y-axis = base_link x-axis? this is wrong. from rviz viewing the data.
 
-----12/4/21 turtlebot  turtlebot3_imuodompt2_3.bag carto test ---
+----12/4/21  turtlebot3_imuodompt2_3.bag carto test fov---
 
 changed turtlebot3_waffle.gazebo.xacro
 	<sensor type="depth" name="realsense_R200">
@@ -802,6 +884,11 @@ changed turtlebot3_waffle.gazebo.xacro
 this seems help a bit. still no good:
 	- point still too dense?
 	- floor point causing problem?
+
+camera field of view:
+<horizontal_fov>1.3439</horizontal_fov>
+	the horizontal_fov decide the horizental field of view, this further decide the vertical fov by scale by w/h resolution ratio. fixing hori fov, change the w/h ratio affect how much vertical content will be see, and the resolution of the data points.
+
 
 see 11/29/21 note prev test run
 
@@ -1152,6 +1239,10 @@ see readme_nvidia_nano.txt 9/8/21 note
 		each trajectory point have one associated submap, 
 		labeled: trajid, submap index id, version #: 0,0,320
 
+to obtain a trajectory:
+	carto 2.0.0
+	rosservice call /trajectory_query "trajectory_id: 0" > traj_0.txt
+		the list is the scan match estimated pose
 to obtain a submap:
 rosservice call /submap_query "trajectory_id: 0
 submap_index: 0"  > submap_0.0.txt

@@ -57,8 +57,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 0.3046610951423645
-        Min Value: -1.473221778869629
+        Max Value: 1.0017627477645874
+        Min Value: 0.0003215894103050232
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -167,29 +167,61 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        base_footprint:
+          Value: true
         base_link:
           Value: true
+        base_scan:
+          Value: true
+        camera_depth_frame:
+          Value: true
         camera_depth_optical_frame:
+          Value: true
+        camera_link:
+          Value: true
+        camera_rgb_frame:
+          Value: true
+        camera_rgb_optical_frame:
+          Value: true
+        caster_back_left_link:
+          Value: true
+        caster_back_right_link:
           Value: true
         imu_link:
           Value: false
         odom:
           Value: false
-        vertical_vlp16_link:
-          Value: false
+        wheel_left_link:
+          Value: true
+        wheel_right_link:
+          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        base_link:
-          camera_depth_optical_frame:
-            {}
-          imu_link:
-            {}
-          vertical_vlp16_link:
-            {}
+        base_footprint:
+          base_link:
+            base_scan:
+              {}
+            camera_link:
+              camera_depth_frame:
+                camera_depth_optical_frame:
+                  {}
+              camera_rgb_frame:
+                camera_rgb_optical_frame:
+                  {}
+            caster_back_left_link:
+              {}
+            caster_back_right_link:
+              {}
+            imu_link:
+              {}
+            wheel_left_link:
+              {}
+            wheel_right_link:
+              {}
         odom:
           {}
       Update Interval: 0
@@ -198,7 +230,7 @@ Visualization Manager:
   Global Options:
     Background Color: 136; 138; 133
     Default Light: true
-    Fixed Frame: base_link
+    Fixed Frame: odom
     Frame Rate: 30
   Name: root
   Tools:
@@ -222,25 +254,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 5.3203535079956055
+      Distance: 16.242202758789062
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -1.6106374263763428
-        Y: -0.5929352045059204
-        Z: -0.7755504250526428
+        X: -3.8269472122192383
+        Y: -0.5184635519981384
+        Z: -0.4080502986907959
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5397966504096985
+      Pitch: 0.8597963452339172
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.7885834574699402
+      Yaw: 1.3435829877853394
     Saved: ~
 Window Geometry:
   Displays:
@@ -261,4 +293,4 @@ Window Geometry:
     collapsed: true
   Width: 1200
   X: 329
-  Y: 61
+  Y: 27

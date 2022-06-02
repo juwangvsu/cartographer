@@ -91,7 +91,7 @@ def pt2_2_pcd(pt2msg):
 
 def callback_pt2(pt2msg):
    global pt2pub, msgt1_prev, skipcnt, pt2frames, letters, pt2random
-   print("pt2, skipcnt:", skipcnt, pt2frames, 'w/h/rs/ps/: ', pt2msg.width, pt2msg.height,pt2msg.row_step, ' data[$] ' , pt2msg.point_step,pt2msg.data[2457599])
+   print("pt2, skipcnt:", skipcnt, pt2frames, 'w/h/rs/ps/: ', pt2msg.width, pt2msg.height,pt2msg.row_step, pt2msg.point_step)
    msgt1 =pt2msg.header.stamp.secs + 1.0*pt2msg.header.stamp.nsecs/1000000000
    #print('t1, t1_prev: ', msgt1, msgt1_prev)
    if msgt1 < msgt1_prev:

@@ -28,7 +28,7 @@ def find_matching_odom(tm):
             return odomdata[j]
 smlog_2=[]
 #add head
-smlog_2.append(['time,init_x,	y,	z,	qw,	qx,	qy,	qz,	smx,	y,	z,	qw,	qx,	qy,	qz,	t,		odomx,	y,	z,	qx,	qy,	qz,	qw,	eulerpre_x_angle,	yangle,	zangle,	euler_odom_xangle,	yangle,	zangle'])
+smlog_2.append('time, fn, init_x,	y,	z,	qw,	qx,	qy,	qz,	smx,	y,	z,	qw,	qx,	qy,	qz,	t,		odm, odomx,	y,	z,	qx,	qy,	qz,	qw,	eulerpre, x_angle,	yangle,	zangle,	euler_odom, xangle,	yangle,	zangle'.split(','))
 #smlog_2.append(scanmatchlog[0]+odomdata[0])
 for i in range(1,len(scanmatchlog)):
     tt = float(scanmatchlog[i][0])/1000000000

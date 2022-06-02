@@ -18,6 +18,7 @@
 -->
 
 <launch>
+<arg name="cartover" default="1.0.0"/>
    <arg name="open_rviz" default="true"/>
   <param name="/use_sim_time" value="true" />
   <param name="robot_description"
@@ -26,6 +27,7 @@
   <node name="robot_state_publisher" pkg="robot_state_publisher"
     type="robot_state_publisher" />
 
+<group if="$(eval cartover == '1.0.0')">
   <node name="cartographer_node" pkg="cartographer_ros"
       type="cartographer_node" args="
           -configuration_directory /home/student/Documents/cartographer/configuration_files
@@ -33,8 +35,21 @@
       output="screen">
     <remap from="points2" to="/camera/depth/points2" />
     <remap from="imu" to="/mavros/imu/data" />
-
   </node>
+</group>
+
+<group if="$(eval cartover == '2.0.0')">
+  <node name="cartographer_node" pkg="cartographer_ros"
+      type="cartographer_node" args="
+          -configuration_directory /home/student/Documents/cartographer/configuration_files2
+          -configuration_basename p3at_3d.lua"
+      output="screen">
+    <remap from="points2" to="/camera/depth/points2" />
+    <remap from="imu" to="/mavros/imu/data" />
+  </node>
+</group>
+
+
 <group if="$(arg open_rviz)">
 
 <node name="rviz" pkg="rviz" type="rviz" required="true"
